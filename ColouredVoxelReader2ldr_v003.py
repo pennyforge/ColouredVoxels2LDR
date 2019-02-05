@@ -277,7 +277,7 @@ partID = "3005.dat" #Use 1x1 bricks
 
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 fileName = initialFileName[:-4] +"_" + dateTimeStamp + ".ldr" #Give every ldr fileName a timestamp
-ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Create a raw ldr line width,height and depth will be updated as the loop below scans the binvox array
+ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Create a raw ldr line width,height and depth will be updated as the loop below scans the .vox array
 
 count = 0 # Used to count the total number of 1x1 bricks
 studMatrix = [] #Used to view slices (for humans!)
@@ -285,22 +285,24 @@ sliceMatrix = []
 
 
 optimise = True
-#The following loops do the heavy lifting reading the binvox array and writing out the bricks to an ldr file...
+#The following loops do the heavy lifting reading the .vox array and writing out the bricks to an ldr file...
 while optimise:
-	for z in range(ldrZ): #Reads the size of the array from the binvox model dimensions - in z - the height
-		for x in range(ldrX): #Reads the size of the array from the binvox model dimensions - in x
-			for y in range(ldrY): #Reads the size of the array from the binvox model dimensions - in y
-				if z <= ldrZ+1: # This will allow you to slice individual layers of the binvox file if you want - Currently it will slice the whole chair_binvox array
-					#if z <= 0: # This will allow you to slice individual layers of the binvox file if you want - Currently it will slice the whole chair_binvox array
-					if numpyArrayForLego[x][y][z]: #Looking for "True" value (as the binvox array is boolean)
+	for z in range(ldrZ): #Reads the size of the array from the .vox model dimensions - in z - the height
+		for x in range(ldrX): #Reads the size of the array from the .vox model dimensions - in x
+			for y in range(ldrY): #Reads the size of the array from the .vox model dimensions - in y
+				if z <= ldrZ+1: # This will allow you to slice individual layers of the .vox file if you want - Currently it will slice the whole chair_.vox array
+					#if z <= 0: # This will allow you to slice individual layers of the .vox file if you want - Currently it will slice the whole chair_.vox array
+					if numpyArrayForLego[x][y][z]: #Looking for "True" value (as the .vox array is boolean)
 						#Create the voxel slice in studMatrix
 						print ("Found coloured voxel...")
-						colour = numpyArrayForLego[x][y][z]
+						colour = numpyArrayForLego[z]
 						studMatrix.append(colour) #Used to view slices (for humans!)
 						count = count + 1
+						#print (studMatrix)
+						#input()
 					else:
 						print ("Skipping - no brick...")
-						studMatrix.append(0) #Used to view slices (for humans!)	
+						#studMatrix.append(0) #Used to view slices (for humans!)	
 
 
 				try:
@@ -322,7 +324,7 @@ while optimise:
 		sliceValue = z 
 		originalMatrix = deepcopy(sliceMatrix)
 		previousMatrix = deepcopy(sliceMatrix)
-		input()
+		#input()
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
