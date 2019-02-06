@@ -75,8 +75,10 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	while optimise:
 		#if sliceValue%2 == 0:
 		#	baseMatrix = baseMatrix[::-1]
-		for x in range(0,baseMatrix.shape[0]):
-			for y in range(0,baseMatrix.shape[1]):
+		intrX = iter(range(0,baseMatrix.shape[0]))
+		intrY = iter(range(0,baseMatrix.shape[1]))
+		for x in intrX:
+			for y in intrY:
 				voxelColour = baseMatrix[x,y]
 				if voxelColour >= 1:
 					brickCounter = brickCounter + 1
