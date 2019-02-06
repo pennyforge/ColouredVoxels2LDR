@@ -78,14 +78,20 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	optimise = True
 	brickCounter = 0
 	dictionaryCounter = 2 # keep a track of the bricks swaps as you work through the matrix
+	x = 0
+	y = 0
+
 	while optimise:
 		#if sliceValue%2 == 0:
 		#	baseMatrix = baseMatrix[::-1]
-		intrX = iter(range(0,baseMatrix.shape[0]))
-		intrY = iter(range(0,baseMatrix.shape[1]))
-		for x in range(0,baseMatrix.shape[0]):
-			for y in range(0,baseMatrix.shape[0]):
+
+		while x < baseMatrix.shape[0]:
+			while y < baseMatrix.shape[1]:
+				#print ("IN ITER LOOP")
+				#input()
 				voxelColour = baseMatrix[x,y]
+				print (x,y,baseMatrix[x,y])
+				#input()
 				if voxelColour >= 1:
 					brickCounter = brickCounter + 1
 					print ("Found Coloured Voxel (2)...")
@@ -155,7 +161,10 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
-									#x = next(iterX+brickY)
+									print("jump here by...",brickY)
+									# but how do you jump the for loop...
+									y = y + brickY
+									input()
 									break
 								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
@@ -170,7 +179,8 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
-									#y = next(iterY+brickX)	
+									x = x + brickX
+									input()
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -187,8 +197,11 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 				else:
 					print ("No Voxel")
 					dictionaryCounter = 2
+					y = y + 1
 		#if brickCounter == nosOfBricks:
 			layerBrickDiscard = 0
+			x = x + 1
+			y=0
 		optimise = False
 		previousMatrix =  deepcopy(baseMatrix)
 	return (baseMatrix,previousMatrix,optimisedBrickData)	
@@ -376,7 +389,7 @@ while optimise:
 		print	
 		#print optimisedBrickData
 		sliceMatrix = deepcopy(originalMatrix)
-		#input()
+		input()
 		#Read the bricks in the optimisedBrickData array
 		countBrick = 0
 		for brick in optimisedBrickData:
