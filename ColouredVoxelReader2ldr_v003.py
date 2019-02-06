@@ -49,6 +49,20 @@ def activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partI
 	ldrLine = active + " " + colour + " " + width + " " + height+ " " + depth  + " " + m1 + " " + m2 + " " + m3 + " " + m4 + " " + m5 + " " + m6 + " " + m7 + " " + m8 + " " + m9 + " " + partID
 	return ldrLine
 
+def brickMatrix(x,y,voxelColour):
+
+	studMatrix = []
+	Width = x
+	Depth = y
+	StudCount = 0 
+	print ("Brick is ",Width, "x" ,Depth)
+	for i in range (0,Width):
+		for j in range(0,Depth):
+			studMatrix.append(voxelColour)
+	brickMatrix = numpy.array(studMatrix).reshape(Depth,Width);
+	return brickMatrix		
+
+
 def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	optimisedBrickData = []
 	sliceCounter = 0
@@ -63,10 +77,10 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 		#	baseMatrix = baseMatrix[::-1]
 		for x in range(0,baseMatrix.shape[0]):
 			for y in range(0,baseMatrix.shape[1]):
-				voxel = baseMatrix[x,y]
-				if voxel == 1:
+				voxelColour = baseMatrix[x,y]
+				if voxelColour >= 1:
 					brickCounter = brickCounter + 1
-					print ("Found Voxel")
+					print ("Found Coloured Voxel")
 					#raw_input()
 					d = optimisationDictionary
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
@@ -75,7 +89,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						dictionaryCounter = dictionaryCounter + 1
 						#check the shapes around the voxel 
 						brickX,brickY = value
-						brick = brickMatrix(brickX,brickY)
+						brick = brickMatrix(brickX,brickY,voxelColour)
 						maxValue = max(value)
 						print (brick.shape)
 						if sliceValue%2 == 0:
@@ -107,7 +121,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						print ()
 						print (previousMatrix) 
 						
-						#raw_input()
+						input()
 						if (baseMatrix==previousMatrix).all() and sliceValue%2 == 0 and brickY > 6:
 							layerBrickDiscard = 1
 							#(a-b).any() alternatively (a-b).all()
@@ -128,7 +142,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									print (baseMatrix)
 									dictionaryCounter = 2
 									print (x,y)
-									optimisedBrickData.append([key,x,y,brickX,brickY,rotate])
+									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
@@ -295,20 +309,20 @@ while optimise:
 					if numpyArrayForLego[x][y][z]: #Looking for "True" value (as the .vox array is boolean)
 						#Create the voxel slice in studMatrix
 						print ("Found coloured voxel...")
-						colour = numpyArrayForLego[z]
-						studMatrix.append(colour) #Used to view slices (for humans!)
+						colour = numpyArrayForLego[x][y][z]
+						#studMatrix.append(colour) 
 						count = count + 1
 						#print (studMatrix)
 						#input()
 					else:
 						print ("Skipping - no brick...")
-						#studMatrix.append(0) #Used to view slices (for humans!)	
+						#studMatrix.append(0) 	
 
 
 				try:
 					#Make an array of studMatrix when the layer is finished
-					sliceMatrix = numpy.array(studMatrix).reshape(x,y)
-					print (sliceMatrix)
+					#sliceMatrix = numpy.array(studMatrix).reshape(x,y)
+					#print (sliceMatrix)
 					print ("Number of bricks in ldr file:",count," Layer: ",z)
 					#raw_input()
 
@@ -322,8 +336,11 @@ while optimise:
 		legoWriter(fileName,dateTimeStamp,'0 STEP') # Add a step for each layer
 		#Set up the variables to optimise the layer
 		sliceValue = z 
-		originalMatrix = deepcopy(sliceMatrix)
-		previousMatrix = deepcopy(sliceMatrix)
+		print (z)
+		#input()
+		sliceMatrix = numpyArrayForLego[z]
+		originalMatrix = deepcopy(numpyArrayForLego[z])
+		previousMatrix = deepcopy(numpyArrayForLego[z])
 		#input()
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
@@ -349,7 +366,7 @@ while optimise:
 		print	
 		#print optimisedBrickData
 		sliceMatrix = deepcopy(originalMatrix)
-
+		input()
 		#Read the bricks in the optimisedBrickData array
 		countBrick = 0
 		for brick in optimisedBrickData:
