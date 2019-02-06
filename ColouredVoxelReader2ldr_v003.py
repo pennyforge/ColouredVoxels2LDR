@@ -64,6 +64,12 @@ def brickMatrix(x,y,voxelColour):
 
 
 def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
+	print ("Optimising Layer...")
+	print ("baseMatrix",baseMatrix)
+	print ("previousMatrix",previousMatrix)
+	print ("sliceValue",sliceValue)
+	
+	
 	optimisedBrickData = []
 	sliceCounter = 0
 	layerBrickDiscard = 0
@@ -77,13 +83,13 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 		#	baseMatrix = baseMatrix[::-1]
 		intrX = iter(range(0,baseMatrix.shape[0]))
 		intrY = iter(range(0,baseMatrix.shape[1]))
-		for x in intrX:
-			for y in intrY:
+		for x in range(0,baseMatrix.shape[0]):
+			for y in range(0,baseMatrix.shape[0]):
 				voxelColour = baseMatrix[x,y]
 				if voxelColour >= 1:
 					brickCounter = brickCounter + 1
-					print ("Found Coloured Voxel")
-					#raw_input()
+					print ("Found Coloured Voxel (2)...")
+					#input()
 					d = optimisationDictionary
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
@@ -123,7 +129,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						print ()
 						print (previousMatrix) 
 						
-						input()
+						#input()
 						if (baseMatrix==previousMatrix).all() and sliceValue%2 == 0 and brickY > 6:
 							layerBrickDiscard = 1
 							#(a-b).any() alternatively (a-b).all()
@@ -149,6 +155,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
+									#x = next(iterX+brickY)
 									break
 								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
@@ -163,6 +170,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
+									#y = next(iterY+brickX)	
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -310,7 +318,7 @@ while optimise:
 					#if z <= 0: # This will allow you to slice individual layers of the .vox file if you want - Currently it will slice the whole chair_.vox array
 					if numpyArrayForLego[x][y][z]: #Looking for "True" value (as the .vox array is boolean)
 						#Create the voxel slice in studMatrix
-						print ("Found coloured voxel...")
+						print ("Found Coloured Voxel (1)...")
 						colour = numpyArrayForLego[x][y][z]
 						#studMatrix.append(colour) 
 						count = count + 1
@@ -368,7 +376,7 @@ while optimise:
 		print	
 		#print optimisedBrickData
 		sliceMatrix = deepcopy(originalMatrix)
-		input()
+		#input()
 		#Read the bricks in the optimisedBrickData array
 		countBrick = 0
 		for brick in optimisedBrickData:
