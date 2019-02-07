@@ -31,7 +31,7 @@ def legoWriter(fileName,dateTimeStamp,ldrLine):
 	return fileName
 
 def activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID):
-	#1 69 -20 -24 -20 0 0 1 0 1 0 -1 0 0 3005.dat
+	#1 69 -20 -24 -20 0 0 1 0 1 0 -1 0 0 3005.dat # EXAMPLE LINE
 	active = str(active)
 	colour = str(colour)	
 	width = str(width)
@@ -49,8 +49,7 @@ def activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partI
 	ldrLine = active + " " + colour + " " + width + " " + height+ " " + depth  + " " + m1 + " " + m2 + " " + m3 + " " + m4 + " " + m5 + " " + m6 + " " + m7 + " " + m8 + " " + m9 + " " + partID
 	return ldrLine
 
-def brickMatrix(x,y,voxelColour):
-
+def brickMatrix(x,y,voxelColour): #Calculate the size of the brick
 	studMatrix = []
 	Width = x
 	Depth = y
@@ -77,20 +76,15 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	print ()
 	optimise = True
 	brickCounter = 0
-	dictionaryCounter = 302 # keep a track of the bricks swaps as you work through the matrix
+	dictionaryCounter = 302 # keep a track of the bricks swaps as you work through the matrix but make the number larger than 300 so that it doesn't get mixed up with 256 colour values
 	x = 0
 	y = 0
 
 	while optimise:
-		#if sliceValue%2 == 0:
-		#	baseMatrix = baseMatrix[::-1]
-
-		while x < baseMatrix.shape[0]:
+		while x < baseMatrix.shape[0]: # Use a while loop rather than a for loop as it gives you more control moving through the loop
 			while y < baseMatrix.shape[1]:
-				#print ("IN ITER LOOP")
-				#input()
 				voxelColour = int(baseMatrix[x,y])
-				if voxelColour > 0 and voxelColour < 256:
+				if voxelColour > 0 and voxelColour < 256: #Make sure we only process coloured voxels not voxels that have already been converted to bricks.
 					print ("found unprocessed voxel...")
 				else:
 					print ("voxel already processed...moving on...")
@@ -105,7 +99,6 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 					d = optimisationDictionary
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
-					#for key, value in sorted(optimisationDictionary.items(), key=lambda (k,v): (v,k), reverse = True):
 						dictionaryCounter = dictionaryCounter + 1
 						#check the shapes around the voxel 
 						brickX,brickY = value
@@ -114,11 +107,10 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						print (brick.shape)
 						if sliceValue%2 == 0:
 							brick = brick.reshape(brickX,brickY) # flips the array horizontal
-								
+						#Find out the distances to the edge of the matrix		
 						print ("DistancesToEndOfFile X and Y:",baseMatrix.shape[0] - x, baseMatrix.shape[1] - y)
 						print ("DistancesToEndOfFile X and Y:",maxValue > baseMatrix.shape[0] - x, maxValue > baseMatrix.shape[1] - y)
-						
-						#print brick
+						#Print out all the values of the matrix and the brick
 						print ("x:",x)
 						print ("brickX:",brickX)
 						print ("y:",y)
@@ -140,19 +132,14 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						print (baseMatrix)
 						print ()
 						print (previousMatrix) 
-						
-						#input()
+						# Check to see if the this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
 						if (baseMatrix==previousMatrix).all() and sliceValue%2 == 0 and brickY > 6:
 							layerBrickDiscard = 1
-							#(a-b).any() alternatively (a-b).all()
 							print ("Matching Layers")
-
 							print ("Discarding ", brick, " brick to fix weak corneres...")
-							#raw_input()
 							#Discard this brick by ignoring it and continue the loop to the next brick....
 							continue
 						else:
-							
 							try:
 								if numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
 									print ("MATCH HORIZONTAL!")
@@ -166,10 +153,8 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
 										previousMatrix =  deepcopy(baseMatrix)
-									#if sliceValue == 2:
-										#raw_input()
 									print("jump here by...",brickY)
-									# but how do you jump the for loop...
+									# you matched a brick but now you need to jump the while loop...
 									y = y + brickY
 									#input()
 									break
@@ -185,8 +170,6 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
 										previousMatrix =  deepcopy(baseMatrix)
-									#if sliceValue == 2:
-										#raw_input()
 									print("jump here by...",brickX)
 									y = y + brickX
 									#input()
@@ -194,20 +177,14 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 								else:
 									print ("Brick won't fit - trying next brick...")
 									print ("======================================")
-									#dictionaryCounter = 2
 							except Exception as e:
 								print ("<<<<<<<<<<<<<-", e,"->>>>>>>>>>>>>>>")
 								print ("Brick won't fit on matrix anyway- trying next brick...")
-								print ("======================================")
-
-								#dictionaryCounter = 2
-								#input() 
-								
+								print ("======================================")								
 				else:
 					print ("No Voxel")
 					dictionaryCounter = 302
 					y = y + 1
-		#if brickCounter == nosOfBricks:
 			layerBrickDiscard = 0
 			x = x + 1
 			y=0
@@ -215,14 +192,12 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 		previousMatrix =  deepcopy(baseMatrix)
 	return (baseMatrix,previousMatrix,optimisedBrickData)	
 
-#Read the voxels back in...
-
+##################### MAIN CODE #####################
+#Read the .vox voxel file...
+layerStop = 11
 initialFileName = "planet_small_gox.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
-
-
 print (voxelMatrix)
-#print (voxelMatrix.models[0][0][0])
 
 #Get the dimensions of the vox file
 x = voxelMatrix.models[0][0][0]
@@ -232,53 +207,51 @@ z = voxelMatrix.models[0][0][2]
 print ("Matrix Dimensions:",x,"x",y,"x",z)
 nosOfVoxels = x*y*z
 
+#Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
 	try:
+		#Pull out the relevant numbers from the .vox file (as I can't work out how to access it directly)
 		voxelData = str(voxelMatrix.models[0][1][i])
 		start = voxelData.find('c=') 
 		end = voxelData.find(')', start)
-		#print ("Voxel colour value:",voxelData[start:end])
 		emptyValue,colour = voxelData[start:end].split('=')
 		#print (colour)
 
 		start = voxelData.find('x=') 
 		end = voxelData.find(', ', start)
-		#print ("Voxel x value:",voxelData[start:end])
 		emptyValue,voxelX = voxelData[start:end].split('=')
 		#print (voxelX)
 		
 		start = voxelData.find('y=') 
 		end = voxelData.find(',', start)
-		#print ("Voxel y value:",voxelData[start:end])
 		null,voxelY = voxelData[start:end].split('=')
 		#print (voxelY)
 
 		start = voxelData.find('z=') 
 		end = voxelData.find(',', start)
-		#print ("Voxel z value:",voxelData[start:end])
 		null,voxelZ = voxelData[start:end].split('=')
 		#print (voxelZ)
 		
 		#Update the array with the colour values
 		numpyArrayForLego[int(voxelX),int(voxelY),int(voxelZ)] = colour
-		
-
-	
 	except Exception as e: 
 		#print(e)
 		print ("Assuming no voxel - skipping")
 
+#Print the primary numpy array
 print ("===========================================")
-
 print (numpyArrayForLego)
 print ("===========================================")
 print ("Matrix Dimensions:",x,"x",y,"x",z)
+
+#Create another viariable to store x,y,z
 ldrX = x
 ldrY = y
 ldrZ = z
-print ()
-print (numpyArrayForLego[0])
+#print ()
+#THIS IS THE FIRST SLICE OF THE ARRAY
+#print (numpyArrayForLego[0])
 
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 		
@@ -296,7 +269,6 @@ optimisationDictionary["3010.DAT"]=[1,4]	#11 311
 optimisationDictionary["3622.DAT"]=[1,3]	#12 312
 optimisationDictionary["3004.DAT"]=[1,2]	#13 313
 optimisationDictionary["3005.DAT"]=[1,1]	#14 314
-
 	
 #print model.data[0,0,0] # Testing only
 #LDR Line example
@@ -308,15 +280,7 @@ width = 0
 height = 0
 depth = 0
 #Set up the basic rotation matrix for the ldr file
-m1 = 0
-m2 = 0
-m3 = 1
-m4 = 0
-m5 = 1
-m6 = 0
-m7 = -1
-m8 = 0
-m9 = 0
+m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
 #Set the part for each voxel - currently this only works for 1x1 bricks - now unused
 partID = "3005.dat" #Use 1x1 bricks
 
@@ -336,37 +300,6 @@ optimise = True
 #The following loops do the heavy lifting reading the .vox array and writing out the bricks to an ldr file...
 while optimise:
 	for z in range(ldrZ): #Reads the size of the array from the .vox model dimensions - in z - the height
-		for x in range(ldrX): #Reads the size of the array from the .vox model dimensions - in x
-			for y in range(ldrY): #Reads the size of the array from the .vox model dimensions - in y
-				if z <= ldrZ+1: # This will allow you to slice individual layers of the .vox file if you want - Currently it will slice the whole chair_.vox array
-					#if z <= 0: # This will allow you to slice individual layers of the .vox file if you want - Currently it will slice the whole chair_.vox array
-					if numpyArrayForLego[x][y][z]: #Looking for "True" value (as the .vox array is boolean)
-						#Create the voxel slice in studMatrix
-						print ("Found Coloured Voxel (1)...")
-						colour = numpyArrayForLego[x][y][z]
-						#studMatrix.append(colour) 
-						count = count + 1
-						#print (studMatrix)
-						#input()
-					else:
-						print ("Skipping - no brick...")
-						#studMatrix.append(0) 	
-
-
-				try:
-					#Make an array of studMatrix when the layer is finished
-					#sliceMatrix = numpy.array(studMatrix).reshape(x,y)
-					#print (sliceMatrix)
-					print ("Number of bricks in ldr file:",count," Layer: ",z)
-					#raw_input()
-
-					#optimise = False
-					#break
-				except Exception as e: 
-					print(e)
-					print ("Waiting for larger matrix")
-				print ("Number of bricks in layer:",count,z)
-		
 		legoWriter(fileName,dateTimeStamp,'0 STEP') # Add a step for each layer
 		#Set up the variables to optimise the layer
 		sliceValue = z 
@@ -375,7 +308,6 @@ while optimise:
 		sliceMatrix = numpyArrayForLego[z]
 		originalMatrix = deepcopy(numpyArrayForLego[z])
 		previousMatrix = deepcopy(numpyArrayForLego[z])
-		#input()
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
@@ -388,7 +320,7 @@ while optimise:
 			raw_input()
 		'''	
 		#Optimise the layer...
-		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,sliceValue)
+		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
 
 		print ("OPTIMISATION COMPLETE...")
 		print
@@ -398,10 +330,10 @@ while optimise:
 		print ("Optimised Lego Matrix Slice")
 		print (sliceMatrix)		
 		print	
-		#print optimisedBrickData
 		sliceMatrix = deepcopy(originalMatrix)
-		input() #USEFUL FOR CHECKING EACH LAYER
-		#Read the bricks in the optimisedBrickData array
+		if z > layerStop:
+			input() #USEFUL FOR CHECKING EACH LAYER
+		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
 		countBrick = 0
 		for brick in optimisedBrickData:
 			countBrick = countBrick + 1
@@ -422,29 +354,37 @@ while optimise:
 			depth = y*20+10+((brickY/2)*20) #Convert x and y into lego dimensions
 			height = z*-24 #Convert z into lego dimensions
 
-			#Make corrections to rotated bricks
+			#MAKE ADJUSTMENTS DEPENDING ON BRICK SIZE 
 			correctionX = 0
 			correctionY = 0
 			
 			if brickX%2 != 0:
 				print ("EVEN")
 				correctionX = 10
-				if count%2 != 0:
+				if z%2 != 0:
 					correctionX = 10
 			if brickY%2 != 0 and brickX !=1 and brickY !=1:
 				print ("ODD")
 				correctionY = 10
-				if count%2 != 0:
+				if z%2 != 0:
 					print ("EVEN 3x2")
 					correctionY = 10
+					correctionX = 10
+				else:
+					correctionY = 0
+			#MAKE ADJUSTMENTS DEPENDING ON BRICK SIZE IF THE BRICKS ARE ROTATED
 			if brickX == 1 and brickY != 1 and brickRotate == 1:
 				if brickY%2 == 0:
 					print ("EVEN + ROTATE")
 				else:
 					print ("ODD + ROTATE")
 					correctionY = correctionY-10	
-					correctionX = correctionX-10
+					correctionX = correctionX+30
 				print ("found complex error")
+				if brickY == 3 and brickX == 1:
+					print ("Found 1x3 - Correcting...")
+					correctionY = correctionY+10
+					correctionX = correctionX-30
 				correctionY = correctionY-20
 				print (correctionY)
 				#raw_input()
@@ -482,16 +422,9 @@ while optimise:
 			else:
 				width = x*20+((brickY/2)*20)-correctionX #Convert x and y into lego dimensions
 				depth = y*20-correctionY #Convert x and y into lego dimensions
+				#Change the rotation of the brick
 				#90 brickRotate 1 4 20 -104 20 -1 0 0 0 1 0 0 0 -1 3001.dat	
-				m1 = -1 
-				m2 = 0 
-				m3 = 0 
-				m4 = 0
-				m5 = 1 
-				m6 = 0 
-				m7 = 0 
-				m8 = 0 
-				m9 = -1
+				m1 = -1;m2 = 0;m3 = 0;m4 = 0;m5 = 1;m6 = 0;m7 = 0;m8 = 0;m9 = -1
 				#Create the ldrLine
 				ldrLine = activeLine(active,brickColour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
 				print (ldrLine)
@@ -503,28 +436,19 @@ while optimise:
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
 			
 			print ("countBrick:",countBrick)
-			
-			input() # USEFUL FOR CHECKING EACH BRICK ADDITION
+			if z > layerStop:
+				input() # USEFUL FOR CHECKING EACH BRICK ADDITION
+			legoWriter(fileName,dateTimeStamp,'0 STEP')
 		z = z + 1
-		count = count + 1
+		#count = count + 1
 		optimisedBrickData = []
 		brickRotate = 0
 		previousMatrix =  deepcopy(sliceMatrix)
 		sliceMatrix = deepcopy(originalMatrix)
 		
 		#Reset the rotation values - this is important otherwise the rotation "sticks" on the next layer!
-		m1 = 0
-		m2 = 0
-		m3 = 1
-		m4 = 0
-		m5 = 1
-		m6 = 0
-		m7 = -1
-		m8 = 0
-		m9 = 0
-
+		m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
 		print ("Layer: ",ldrZ)			
-			
 		#==================================
 		count = 0
 		studMatrix = []
