@@ -194,8 +194,8 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
-layerStop = 11
-initialFileName = "planet_small_gox.vox"
+layerStop = 21
+initialFileName = "planet_gox.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
