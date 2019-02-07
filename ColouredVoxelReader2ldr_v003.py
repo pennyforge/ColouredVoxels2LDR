@@ -77,7 +77,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	print ()
 	optimise = True
 	brickCounter = 0
-	dictionaryCounter = 2 # keep a track of the bricks swaps as you work through the matrix
+	dictionaryCounter = 302 # keep a track of the bricks swaps as you work through the matrix
 	x = 0
 	y = 0
 
@@ -89,7 +89,13 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 			while y < baseMatrix.shape[1]:
 				#print ("IN ITER LOOP")
 				#input()
-				voxelColour = baseMatrix[x,y]
+				voxelColour = int(baseMatrix[x,y])
+				if voxelColour > 0 and voxelColour < 256:
+					print ("found unprocessed voxel...")
+				else:
+					print ("voxel already processed...moving on...")
+					y = y + 1
+					continue
 				print (x,y,baseMatrix[x,y])
 				#input()
 				if voxelColour >= 1:
@@ -153,8 +159,9 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									rotate = 0
 									print (key, dictionaryCounter)
 									baseMatrix[x:x+brickX,y:y+brickY] = dictionaryCounter
+									print ("baseMatrix")
 									print (baseMatrix)
-									dictionaryCounter = 2
+									dictionaryCounter = 302
 									print (x,y)
 									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
@@ -170,33 +177,35 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									print ("MATCH VERTICAL!")
 									rotate = 1
 									print (key, dictionaryCounter)
+									print (dictionaryCounter)
 									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
 									print (baseMatrix)
-									dictionaryCounter = 2
+									dictionaryCounter = 302
 									print (x,y)
 									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
-									x = x + brickX
+									print("jump here by...",brickX)
+									y = y + brickX
 									#input()
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
 									print ("======================================")
 									#dictionaryCounter = 2
-							except:
+							except Exception as e:
+								print ("<<<<<<<<<<<<<-", e,"->>>>>>>>>>>>>>>")
 								print ("Brick won't fit on matrix anyway- trying next brick...")
 								print ("======================================")
 
 								#dictionaryCounter = 2
-								#raw_input()
-
+								#input() 
 								
 				else:
 					print ("No Voxel")
-					dictionaryCounter = 2
+					dictionaryCounter = 302
 					y = y + 1
 		#if brickCounter == nosOfBricks:
 			layerBrickDiscard = 0
@@ -275,19 +284,19 @@ dateTimeStamp = timeStamp() #Get timeStamp for fileName
 		
 #Set Up the Brick Dictionary
 optimisationDictionary = {}
-optimisationDictionary["3006.DAT"]=[2,10]	#3
-optimisationDictionary["3007.DAT"]=[2,8]	#4
-optimisationDictionary["2456.DAT"]=[2,6]	#5
-optimisationDictionary["3001.DAT"]=[2,4]	#6
-optimisationDictionary["3002.DAT"]=[2,3]	#7
-optimisationDictionary["3003.DAT"]=[2,2]	#8
-optimisationDictionary["3008.DAT"]=[1,8]	#9
-optimisationDictionary["3009.DAT"]=[1,6]	#10
-optimisationDictionary["3010.DAT"]=[1,4]	#11
-optimisationDictionary["3622.DAT"]=[1,3]	#12
-optimisationDictionary["3004.DAT"]=[1,2]	#13
-optimisationDictionary["3005.DAT"]=[1,1]	#14
-	
+optimisationDictionary["3006.DAT"]=[2,10]	#3 303
+optimisationDictionary["3007.DAT"]=[2,8]	#4 304
+optimisationDictionary["2456.DAT"]=[2,6]	#5 305
+optimisationDictionary["3001.DAT"]=[2,4]	#6 306
+optimisationDictionary["3002.DAT"]=[2,3]	#7 307
+optimisationDictionary["3003.DAT"]=[2,2]	#8 308
+optimisationDictionary["3008.DAT"]=[1,8]	#9 309
+optimisationDictionary["3009.DAT"]=[1,6]	#10 310
+optimisationDictionary["3010.DAT"]=[1,4]	#11 311
+optimisationDictionary["3622.DAT"]=[1,3]	#12 312
+optimisationDictionary["3004.DAT"]=[1,2]	#13 313
+optimisationDictionary["3005.DAT"]=[1,1]	#14 314
+
 	
 #print model.data[0,0,0] # Testing only
 #LDR Line example
@@ -391,7 +400,7 @@ while optimise:
 		print	
 		#print optimisedBrickData
 		sliceMatrix = deepcopy(originalMatrix)
-		input()
+		input() #USEFUL FOR CHECKING EACH LAYER
 		#Read the bricks in the optimisedBrickData array
 		countBrick = 0
 		for brick in optimisedBrickData:
@@ -495,7 +504,7 @@ while optimise:
 			
 			print ("countBrick:",countBrick)
 			
-			input()
+			input() # USEFUL FOR CHECKING EACH BRICK ADDITION
 		z = z + 1
 		count = count + 1
 		optimisedBrickData = []
