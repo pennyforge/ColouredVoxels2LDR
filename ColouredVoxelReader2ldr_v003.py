@@ -195,7 +195,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
 layerStop = 21
-initialFileName = "planet_gox.vox"
+initialFileName = "planet_small_gox.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
@@ -215,12 +215,12 @@ for i in range(0,nosOfVoxels):
 		voxelData = str(voxelMatrix.models[0][1][i])
 		start = voxelData.find('c=') 
 		end = voxelData.find(')', start)
-		emptyValue,colour = voxelData[start:end].split('=')
+		null,colour = voxelData[start:end].split('=')
 		#print (colour)
 
 		start = voxelData.find('x=') 
 		end = voxelData.find(', ', start)
-		emptyValue,voxelX = voxelData[start:end].split('=')
+		null,voxelZ = voxelData[start:end].split('=')
 		#print (voxelX)
 		
 		start = voxelData.find('y=') 
@@ -230,7 +230,7 @@ for i in range(0,nosOfVoxels):
 
 		start = voxelData.find('z=') 
 		end = voxelData.find(',', start)
-		null,voxelZ = voxelData[start:end].split('=')
+		null,voxelX = voxelData[start:end].split('=')
 		#print (voxelZ)
 		
 		#Update the array with the colour values
