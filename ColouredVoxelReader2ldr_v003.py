@@ -164,7 +164,7 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									print("jump here by...",brickY)
 									# but how do you jump the for loop...
 									y = y + brickY
-									input()
+									#input()
 									break
 								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
@@ -174,13 +174,13 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									print (baseMatrix)
 									dictionaryCounter = 2
 									print (x,y)
-									optimisedBrickData.append([key,x,y,brickX,brickY,rotate])
+									optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									if layerBrickDiscard == 1:
 										previousMatrix =  deepcopy(baseMatrix)
 									#if sliceValue == 2:
 										#raw_input()
 									x = x + brickX
-									input()
+									#input()
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -314,6 +314,8 @@ partID = "3005.dat" #Use 1x1 bricks
 
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 fileName = initialFileName[:-4] +"_" + dateTimeStamp + ".ldr" #Give every ldr fileName a timestamp
+fileName = initialFileName[:-4] + ".ldr" #Give every ldr file the SAME  fileName
+
 ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Create a raw ldr line width,height and depth will be updated as the loop below scans the .vox array
 
 count = 0 # Used to count the total number of 1x1 bricks
@@ -396,7 +398,7 @@ while optimise:
 			countBrick = countBrick + 1
 			print (brick)
 			print ()
-			print (brick[0],brick[1],brick[2],brick[3],brick[4],brick[5])
+			print (brick[0],brick[1],brick[2],brick[3],brick[4],brick[5],brick[6])
 			#Assign the variables for each element in optimisedBrickData  
 			partID = brick[0]
 			x = brick[1]
@@ -404,7 +406,8 @@ while optimise:
 			brickX = brick[3]
 			brickY = brick[4]
 			brickRotate = brick[5]
-			
+			brickColour = brick[6]
+
 			#Convert to Lego Values
 			width = x*20+10 #Convert x and y into lego dimensions
 			depth = y*20+10+((brickY/2)*20) #Convert x and y into lego dimensions
@@ -419,7 +422,7 @@ while optimise:
 				correctionX = 10
 				if count%2 != 0:
 					correctionX = 10
-			if brickY%2 != 0:
+			if brickY%2 != 0 and brickX !=1 and brickY !=1:
 				print ("ODD")
 				correctionY = 10
 				if count%2 != 0:
@@ -427,9 +430,9 @@ while optimise:
 					correctionY = 10
 			if brickX == 1 and brickY != 1 and brickRotate == 1:
 				if brickY%2 == 0:
-					print ("EVEN")
+					print ("EVEN + ROTATE")
 				else:
-					print ("ODD")
+					print ("ODD + ROTATE")
 					correctionY = correctionY-10	
 					correctionX = correctionX-10
 				print ("found complex error")
@@ -465,7 +468,8 @@ while optimise:
 			if brickRotate == 0:
 				width = width - correctionX
 				depth = depth + correctionY
-				ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
+				ldrLine = activeLine(active,brickColour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
+				print (ldrLine)
 			else:
 				width = x*20+((brickY/2)*20)-correctionX #Convert x and y into lego dimensions
 				depth = y*20-correctionY #Convert x and y into lego dimensions
@@ -480,15 +484,18 @@ while optimise:
 				m8 = 0 
 				m9 = -1
 				#Create the ldrLine
-				ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
+				ldrLine = activeLine(active,brickColour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
 				print (ldrLine)
-				
+			#initialise the ldr file on the first pass
+			if z == 0 and countBrick == 1:
+				LDrawFile = open(fileName, 'w')
+				LDrawFile.close()
 			#Write the LDR name to file...	
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
 			
 			print ("countBrick:",countBrick)
 			
-			
+			input()
 		z = z + 1
 		count = count + 1
 		optimisedBrickData = []
