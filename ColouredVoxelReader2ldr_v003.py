@@ -194,8 +194,8 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
-layerStop = 12
-initialFileName = "simple3.vox"
+layerStop = 10000
+initialFileName = "Building7a.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
@@ -206,7 +206,7 @@ x = voxelMatrix.models[0][0][2]
 
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
-input()
+#input()
 #Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
@@ -246,8 +246,8 @@ print ("===========================================")
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(2)")
 #Create another viariable to store x,y,z
 heightOfMatrix = x
-WidthOfMatrix = y
-DepthOfMatrix = z
+widthOfMatrix = y
+depthOfMatrix = z
 #print ()
 #THIS IS THE FIRST SLICE OF THE ARRAY
 #print (numpyArrayForLego[0])
@@ -330,7 +330,7 @@ while optimise:
 		print (sliceMatrix)		
 		print	
 		sliceMatrix = deepcopy(originalMatrix)
-		input()
+		#input()
 		if z >= layerStop:
 			input() #USEFUL FOR CHECKING EACH LAYER
 		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
