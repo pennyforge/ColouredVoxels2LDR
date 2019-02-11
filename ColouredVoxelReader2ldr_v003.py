@@ -194,19 +194,19 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
-layerStop = 21
-initialFileName = "planet_small_gox.vox"
+layerStop = 12
+initialFileName = "simple3.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
 #Get the dimensions of the vox file
-x = voxelMatrix.models[0][0][0]
+z = voxelMatrix.models[0][0][0]
 y = voxelMatrix.models[0][0][1]
-z = voxelMatrix.models[0][0][2]
+x = voxelMatrix.models[0][0][2]
 
-print ("Matrix Dimensions:",x,"x",y,"x",z)
+print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
-
+input()
 #Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
@@ -243,12 +243,11 @@ for i in range(0,nosOfVoxels):
 print ("===========================================")
 print (numpyArrayForLego)
 print ("===========================================")
-print ("Matrix Dimensions:",x,"x",y,"x",z)
-
+print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(2)")
 #Create another viariable to store x,y,z
-ldrX = x
-ldrY = y
-ldrZ = z
+heightOfMatrix = x
+WidthOfMatrix = y
+DepthOfMatrix = z
 #print ()
 #THIS IS THE FIRST SLICE OF THE ARRAY
 #print (numpyArrayForLego[0])
@@ -299,7 +298,7 @@ sliceMatrix = []
 optimise = True
 #The following loops do the heavy lifting reading the .vox array and writing out the bricks to an ldr file...
 while optimise:
-	for z in range(ldrZ): #Reads the size of the array from the .vox model dimensions - in z - the height
+	for z in range(heightOfMatrix): #Reads the size of the array from the .vox model dimensions - in z - the height
 		legoWriter(fileName,dateTimeStamp,'0 STEP') # Add a step for each layer
 		#Set up the variables to optimise the layer
 		sliceValue = z 
@@ -331,7 +330,8 @@ while optimise:
 		print (sliceMatrix)		
 		print	
 		sliceMatrix = deepcopy(originalMatrix)
-		if z > layerStop:
+		input()
+		if z >= layerStop:
 			input() #USEFUL FOR CHECKING EACH LAYER
 		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
 		countBrick = 0
@@ -436,7 +436,7 @@ while optimise:
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
 			
 			print ("countBrick:",countBrick)
-			if z > layerStop:
+			if z >= layerStop:
 				input() # USEFUL FOR CHECKING EACH BRICK ADDITION
 			legoWriter(fileName,dateTimeStamp,'0 STEP')
 		z = z + 1
@@ -448,11 +448,11 @@ while optimise:
 		
 		#Reset the rotation values - this is important otherwise the rotation "sticks" on the next layer!
 		m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
-		print ("Layer: ",ldrZ)			
+		print ("Layer: ",heightOfMatrix)			
 		#==================================
 		count = 0
 		studMatrix = []
-		if z == ldrZ:
+		if z == heightOfMatrix:
 			optimise = False # Quit when the top layer is reached
 		
 print ("MODEL CONVERSION COMPLETE - Your .ldr file is:", fileName)
