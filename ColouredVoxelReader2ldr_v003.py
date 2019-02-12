@@ -194,8 +194,8 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 
 def getColourList(voxelColourRGB):
 	for c in range(len(voxelColourRGB)):
-		print (voxelColourRGB[c])
-		input()
+		print (".vox colour value:",c+1," - ",voxelColourRGB[c])
+	input()
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
@@ -215,7 +215,7 @@ nosOfVoxels = x*y*z
 
 #Create a lookup table for the colours
 voxelColourRGB = voxelMatrix._palette
-#getColourList(voxelColourRGB)
+getColourList(voxelColourRGB)
 
 #Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
