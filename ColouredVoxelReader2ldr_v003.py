@@ -192,10 +192,15 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 		previousMatrix =  deepcopy(baseMatrix)
 	return (baseMatrix,previousMatrix,optimisedBrickData)	
 
+def getColourList(voxelColourRGB):
+	for c in range(len(voxelColourRGB)):
+		print (voxelColourRGB[c])
+		input()
+
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
-layerStop = 10000
-initialFileName = "Building7a.vox"
+layerStop = 1
+initialFileName = "simple4.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
@@ -207,6 +212,11 @@ x = voxelMatrix.models[0][0][2]
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
 #input()
+
+#Create a lookup table for the colours
+voxelColourRGB = voxelMatrix._palette
+#getColourList(voxelColourRGB)
+
 #Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
@@ -216,6 +226,7 @@ for i in range(0,nosOfVoxels):
 		start = voxelData.find('c=') 
 		end = voxelData.find(')', start)
 		null,colour = voxelData[start:end].split('=')
+		
 		#print (colour)
 
 		start = voxelData.find('x=') 
@@ -241,7 +252,7 @@ for i in range(0,nosOfVoxels):
 
 #Print the primary numpy array
 print ("===========================================")
-print (numpyArrayForLego)
+print ("original",numpyArrayForLego)
 print ("===========================================")
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(2)")
 #Create another viariable to store x,y,z
@@ -304,9 +315,15 @@ while optimise:
 		sliceValue = z 
 		print (z)
 		#input()
-		sliceMatrix = numpyArrayForLego[z]
-		originalMatrix = deepcopy(numpyArrayForLego[z])
-		previousMatrix = deepcopy(numpyArrayForLego[z])
+		#Orientate the TOP view in LDR to match the TOP view in GOXEL
+		sliceMatrix = numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1)
+		originalMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
+		previousMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
+
+		#sliceMatrix = numpyArrayForLego[z]
+		#originalMatrix = deepcopy(numpyArrayForLego[z])
+		#previousMatrix = deepcopy(numpyArrayForLego[z])
+
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
@@ -456,4 +473,5 @@ while optimise:
 			optimise = False # Quit when the top layer is reached
 		
 print ("MODEL CONVERSION COMPLETE - Your .ldr file is:", fileName)
-
+print ("Colour Palette")
+print (voxelColourRGB)
