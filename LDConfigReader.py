@@ -46,4 +46,5 @@ for line in linesFromLDConfig:
 			print ("invalid value - skipping...")
 		#legoColourCode = int(legoColourCode.strip())
 		print ("CODE:",legoColourCode)
+		#aDict[key] = value
 		print("============================================")
