@@ -195,12 +195,18 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 def getColourList(voxelColourRGB):
 	for c in range(len(voxelColourRGB)):
 		print (".vox colour value:",c+1," - ",voxelColourRGB[c])
+		colourValues = voxelColourRGB[c]
+		colourValueR = getattr(colourValues, 'r')
+		colourValueG = getattr(colourValues, 'g')
+		colourValueB = getattr(colourValues, 'b')
+		colourValueA = getattr(colourValues, 'a')
+		print (colourValueR,",",colourValueG,",",colourValueB,",",colourValueA)
 	input()
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
-layerStop = 1
-initialFileName = "simple4.vox"
+layerStop = 100
+initialFileName = "planet_gox.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix)
 
