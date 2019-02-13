@@ -193,35 +193,105 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 	return (baseMatrix,previousMatrix,optimisedBrickData)	
 
 def getColourList(voxelColourRGB):
+	voxelRGBCodeDictionary = {}
 	for c in range(len(voxelColourRGB)):
-		print (".vox colour value:",c+1," - ",voxelColourRGB[c])
+		#print (".vox colour value:",c+1," - ",voxelColourRGB[c])
 		colourValues = voxelColourRGB[c]
 		colourValueR = getattr(colourValues, 'r')
 		colourValueG = getattr(colourValues, 'g')
 		colourValueB = getattr(colourValues, 'b')
 		colourValueA = getattr(colourValues, 'a')
-		print (colourValueR,",",colourValueG,",",colourValueB,",",colourValueA)
-	input()
+		#print (colourValueR,",",colourValueG,",",colourValueB,",",colourValueA)
+		voxelRGBCodeDictionary[c+1] = (colourValueR,colourValueG,colourValueB)
+	#input()
+	return voxelRGBCodeDictionary
+
+#Read LDConfig File
+def checkAndReadLDConfig():
+	which_Ldraw = "C:\\ldraw\\LDConfig.ldr"
+	if os.path.isfile(which_Ldraw):
+		print ("Found LDConfig")
+		with open(which_Ldraw) as f:
+			lines = f.readlines()
+	else:
+		print ("Unable to find LDConfig file")
+		sys.exit(0)
+	return lines
+
+def hex2rgb(hexColour): # https://stackoverflow.com/questions/29643352/converting-hex-to-rgb-value-in-python
+	h = hexColour.lstrip('#')
+	#print('RGB =', tuple(int(h[i:i+2], 16) for i in (0, 2 ,4)))
+	rgbValues = tuple(int(h[i:i+2], 16) for i in (0, 2 ,4))
+	return rgbValues
+
+def find_between( s, first, last ): # https://stackoverflow.com/questions/3368969/find-string-between-two-substrings
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+#From http://stackoverflow.com/questions/34366981/python-pil-finding-nearest-color-rounding-colors
+def distance(c1, c2): # Work out the nearest colour 
+    (r1,g1,b1) = c1
+    (r2,g2,b2) = c2
+    return math.sqrt((r1 - r2)**2 + (g1 - g2) ** 2 + (b1 - b2) **2)
+
+def createCodeDictionary():
+	legoRGBCodeDictionary = {}
+	linesFromLDConfig = checkAndReadLDConfig()
+	for line in linesFromLDConfig:
+		if str(line)[0:4] == '0 !C':
+			#print (line[:-1])
+			first = "VALUE "
+			last = "   EDGE"
+			hexColour = find_between( line, first, last )
+			print (hexColour)
+			rgbValues = hex2rgb(hexColour)
+			print ("RGB:",rgbValues)
+			first = "CODE"
+			last = "VALUE"
+			try:
+				legoColourCode =  int(find_between( line, first, last ))
+			except:
+				print ("invalid value - skipping...")
+			#legoColourCode = int(legoColourCode.strip())
+			print ("CODE:",legoColourCode)
+			#aDict[key] = value
+			legoRGBCodeDictionary[legoColourCode] = rgbValues
+			print("============================================")
+	print("Lego Colours From LDConfig.ldr")
+	print (legoRGBCodeDictionary)
+	return legoRGBCodeDictionary
+
+
+
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
+legoRGBCodeDictionary = createCodeDictionary()
 layerStop = 100
 initialFileName = "planet_gox.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
-print (voxelMatrix)
+#print (voxelMatrix) #view the whole voxel matrix for checking
 
 #Get the dimensions of the vox file
 z = voxelMatrix.models[0][0][0]
 y = voxelMatrix.models[0][0][1]
 x = voxelMatrix.models[0][0][2]
-
+print ()
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
+print (nosOfVoxels)
+print ()
 #input()
 
 #Create a lookup table for the colours
 voxelColourRGB = voxelMatrix._palette
-getColourList(voxelColourRGB)
+voxelRGBCodeDictionary = getColourList(voxelColourRGB)
+print ("Original Voxel Colour Palette")
+print (voxelRGBCodeDictionary)
 
 #Zero out the numpy array used to store the primary Lego matrix
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
@@ -233,7 +303,18 @@ for i in range(0,nosOfVoxels):
 		end = voxelData.find(')', start)
 		null,colour = voxelData[start:end].split('=')
 		
-		#print (colour)
+		print ("===========Start Colour Conversion============")
+		print ("Voxel Colour Value",colour)
+		voxelPointColour = voxelRGBCodeDictionary.get(int(colour))
+		print ("ORIGINAL VOXEL PALETTE COLOUR RGB",voxelPointColour)
+		
+		#colors = list(legoRGBCodeDictionary.keys())
+		#closest_colors = sorted(colors, key=lambda color: distance(color, voxelPointColour))
+		#closest_color = closest_colors[0]
+		#legoCode = legoRGBCodeDictionary[closest_color]
+		#print ("Lego Code:", legoCode)
+		input()
+		print ("===========End Colour Conversion==========")
 
 		start = voxelData.find('x=') 
 		end = voxelData.find(', ', start)
