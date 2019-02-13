@@ -1,4 +1,5 @@
 import os.path
+import math
 
 #Read LDConfig File
 def checkAndReadLDConfig():
@@ -34,10 +35,10 @@ def distance(c1, c2): # Work out the nearest colour
 
 
 def createCodeDictionary():
-	rgb_code_dictionary = {}
+	legoRGBCodeDictionary = {}
 	linesFromLDConfig = checkAndReadLDConfig()
 	for line in linesFromLDConfig:
-		if str(line)[0:4] == '0 !C':
+		if str(line)[0:4] == '0 !C' and ("ALPHA" or "RUBBER" or "MATERIAL" or "METAL" or "CHROME" or "PEARLESCENT") not in str(line):
 			#print (line[:-1])
 			first = "VALUE "
 			last = "   EDGE"
@@ -54,23 +55,40 @@ def createCodeDictionary():
 			#legoColourCode = int(legoColourCode.strip())
 			print ("CODE:",legoColourCode)
 			#aDict[key] = value
-			rgb_code_dictionary[legoColourCode] = rgbValues
+			legoRGBCodeDictionary[legoColourCode] = rgbValues
 			print("============================================")
 
-	print (rgb_code_dictionary)
-	return rgb_code_dictionary
+	print (legoRGBCodeDictionary)
+	return legoRGBCodeDictionary
 
-createCodeDictionary()
+def findClosestLegoColurCode(rgb,legoRGBCodeDictionary):
+	comparisionDictionary = {}
+	legoRGBCodeDictionaryKeys = list(legoRGBCodeDictionary.keys()) #Get all the keys from the TLG Colour Dictionary (as the numbers don't run consequetively)
+	#print (legoRGBCodeDictionaryKeys)
+	print ("Running compare...please wait...")
+	for legoColourCode in legoRGBCodeDictionaryKeys: # For each key do...
+		#print ("Lego Colour Code:",legoColourCode) # Get the TLG colour
+		dictRGB = legoRGBCodeDictionary.get(legoColourCode) # Get the dictionary RGB value
+		#print ("Dictionary RGB Value:",dictRGB)
+		colourDistance = distance(rgb,dictRGB) #now compare the two rgb values
+		#print ("Colour Distance:",colourDistance)
+		comparisionDictionary[legoColourCode] = colourDistance	#Put the TLG colour code in a dictionary with the distance value
 
-#col = rgbPixels[j,i]
-		
-##Check the pixel colour with the Lego dictionary colours
-#point = col
-#colors = list(rgb_code_dictionary.keys())
-#closest_colors = sorted(colors, key=lambda color: distance(color, point))
-#closest_color = closest_colors[0]
-#code = rgb_code_dictionary[closest_color]
+		d = comparisionDictionary
+		sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)] # Reverse - Make sure the last value it spits out is the closest...
+		for key, value in sortedDictionary:
+			#print ("Key:", key, "Value:",value)
+			closestLegoCode = key
+		#print ("==================================")
+		#input()
+	return closestLegoCode
 
+rgb = (78,200,100)
 
-##set the Lego colour to the colour code
-#col = int(code)
+legoRGBCodeDictionary = createCodeDictionary()
+closestLegoCode = findClosestLegoColurCode(rgb,legoRGBCodeDictionary)
+
+print ()
+print ()
+print ("The closest Lego colour code to your colour", rgb," is:",closestLegoCode)
+
