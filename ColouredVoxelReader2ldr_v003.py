@@ -292,8 +292,8 @@ def findClosestLegoColourCode(rgb,legoRGBCodeDictionary):
 #Read the .vox voxel file...
 legoRGBCodeDictionary = createCodeDictionary()
 layerStop = 100
-initialFileName = "myMoc01.vox"
-#initialFileName = "base.vox"
+#initialFileName = "myMoc01.vox"
+initialFileName = "yoshi_gox_CC01.vox"
 voxelMatrix = VoxParser(initialFileName).parse()
 print (voxelMatrix) #view the whole voxel matrix for checking
 input()
