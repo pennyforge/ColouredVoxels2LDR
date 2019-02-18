@@ -7,6 +7,7 @@ from pyvox.parser import VoxParser
 from numpy import zeros,newaxis,array
 from numpy import vstack,hstack,dstack
 from copy import deepcopy
+import glob
 
 #Create a human readable timestamp`
 def timeStamp ():
@@ -256,9 +257,9 @@ def createCodeDictionary():
 				legoColourCode =  int(find_between( line, first, last ))
 			except:
 				print ("invalid value - skipping...")
-			#legoColourCode = int(legoColourCode.strip())
-			print ("CODE:",legoColourCode)
-			#aDict[key] = value
+			
+			#print ("CODE:",legoColourCode)
+			
 			legoRGBCodeDictionary[legoColourCode] = rgbValues
 			#print("============================================")
 	#print("Lego Colours From LDConfig.ldr")
@@ -287,13 +288,75 @@ def findClosestLegoColourCode(rgb,legoRGBCodeDictionary):
 		#input()
 	return closestLegoCode
 
+def checkInput(nosOfFiles):
+	userNumber = input("Choose number? (q to quit) ")
+	if userNumber == "q" or userNumber == "Q" or userNumber == "Quit":
+		print("Exiting...")
+		print ()
+		sys.exit(0)
+	else:
+		try:
+			numberChosen = int(userNumber)
+			#pass
+		except:
+			print ()
+			print ("Opps that's not a number")
+			userNumber = checkInput(nosOfFiles)
+			numberChosen = userNumber
+		
+	while numberChosen < 1 or numberChosen > nosOfFiles:
+		if nosOfFiles == 1:
+			print ()
+			print ("You need to choose '1'!")				
+			userNumber = checkInput(nosOfFiles)
+		else:	
+			print ()
+			print ("Opps that number is not between 1 and ", nosOfFiles)
+			userNumber = checkInput(nosOfFiles)
+	
+		numberChosen = userNumber
+		print ("Good choice...",numberChosen)
+		break
+	return (numberChosen)
+		
+def getFile():
+	pathName = os.path.dirname(os.path.abspath(__file__))
+	# Find all the .bmps in the script folder...
+	fileList=[] 
+	nosOfFiles = 0
+	for file in sorted(glob.glob( os.path.join(pathName, '*.vox') )):
+		fileName = os.path.basename(file)
+		fileList.append(fileName)
+		nosOfFiles=nosOfFiles + 1
+
+	if nosOfFiles > 0:	
+		print ("Enter the number of the file you want to make an ldr of...")
+		for fileName in fileList:
+			indexNumber = fileList.index(fileName)
+			print (indexNumber+1, "-", fileName)
+		confirmedNumber = checkInput(nosOfFiles)
+		print ("Confirmed Number:",confirmedNumber)
+		#input()
+		nameOfFile = fileList[int(confirmedNumber)-1]
+	else:
+		print ("Please add some .vox images files to the script folder") 
+		print ("Script will now quit...")
+		print ()
+		sys.exit(0)
+	
+	return (nameOfFile)	
+
 
 ##################### MAIN CODE #####################
 #Read the .vox voxel file...
 legoRGBCodeDictionary = createCodeDictionary()
 layerStop = 10000
-initialFileName = "simple4.vox"
+#initialFileName = "simple4.vox"
 #initialFileName = "yoshi_gox_CC01.vox"
+print ("Looking for .vox files...")
+initialFileName = getFile()
+print ("You chose: ", initialFileName)
+
 voxelMatrix = VoxParser(initialFileName).parse()
 #print (voxelMatrix) #view the whole voxel matrix for checking
 #input()
