@@ -356,8 +356,14 @@ layerStop = 10000
 print ("Looking for .vox files...")
 initialFileName = getFile()
 print ("You chose: ", initialFileName)
-
-voxelMatrix = VoxParser(initialFileName).parse()
+try:
+	voxelMatrix = VoxParser(initialFileName).parse()
+except:
+	print("There is a problem reading this .vox file - Try exporting the file from Goxel as a .vox file")
+	print ()
+	print ("Script will now exit")
+	print
+	sys.exit(0)
 #print (voxelMatrix) #view the whole voxel matrix for checking
 #input()
 
@@ -384,10 +390,24 @@ numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
 	try:
 		#Pull out the relevant numbers from the .vox file (as I can't work out how to access it directly)
-		voxelData = str(voxelMatrix.models[0][1][i])
-		start = voxelData.find('c=') 
-		end = voxelData.find(')', start)
-		null,colour = voxelData[start:end].split('=')
+		#voxelData = str(voxelMatrix.models[0][1][i])
+		#print (voxelData)
+		colour = getattr(voxelMatrix.models[0][1][i], 'c')
+		voxelX = getattr(voxelMatrix.models[0][1][i], 'z') # VoxelX = z - Weird I know but it's to do with the orienation of the model!	
+		voxelY = getattr(voxelMatrix.models[0][1][i], 'y') 
+		voxelZ = getattr(voxelMatrix.models[0][1][i], 'x') # voxelZ = x - Weird I know but it's to do with the orienation of the model!
+
+		print (colour, voxelX,voxelY,voxelZ)
+		#colourValueR = getattr(colourValues, 'r')
+		#colourValueG = getattr(colourValues, 'g')
+		#colourValueB = getattr(colourValues, 'b')
+		#colourValueA = getattr(colourValues, 'a')
+		#input()
+
+
+		#start = voxelData.find('c=') 
+		#end = voxelData.find(')', start)
+		#null,colour = voxelData[start:end].split('=')
 		
 		print ("===========Start Colour Conversion============")
 		print ("Voxel Colour Value",colour)
@@ -406,27 +426,27 @@ for i in range(0,nosOfVoxels):
 		#input() # For Checking
 		print ("===========End Colour Conversion==========")
 
-		start = voxelData.find('x=') 
-		end = voxelData.find(', ', start)
-		null,voxelZ = voxelData[start:end].split('=')
+		#start = voxelData.find('x=') 
+		#end = voxelData.find(', ', start)
+		#null,voxelZ = voxelData[start:end].split('=')
 		#print (voxelX)
 		
-		start = voxelData.find('y=') 
-		end = voxelData.find(',', start)
-		null,voxelY = voxelData[start:end].split('=')
+		#start = voxelData.find('y=') 
+		#end = voxelData.find(',', start)
+		#null,voxelY = voxelData[start:end].split('=')
 		#print (voxelY)
 
-		start = voxelData.find('z=') 
-		end = voxelData.find(',', start)
-		null,voxelX = voxelData[start:end].split('=')
+		#start = voxelData.find('z=') 
+		#end = voxelData.find(',', start)
+		#null,voxelX = voxelData[start:end].split('=')
 		#print (voxelZ)
 		
 		#Update the array with the colour values
 		numpyArrayForLego[int(voxelX),int(voxelY),int(voxelZ)] = colour
 	except Exception as e: 
 		#if "list index out of range" not in e:
-		#	print(e)
-		#	input()
+		#print(e)
+		#input()
 		print ("Assuming no voxel - skipping")
 		#input()
 #Print the primary numpy array
