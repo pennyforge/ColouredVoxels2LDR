@@ -1,11 +1,25 @@
-import numpy 
+try: # Check for numpy
+	import numpy 
+	from numpy import zeros,newaxis,array
+	from numpy import vstack,hstack,dstack
+except:
+	print ("Opps - you need 'numpy' try 'pip install numpy'")
+	print ("Script will now exit")
+	print
+	sys.exit(0)
+
+try: # Check for py-vox-io
+	from pyvox.models import Vox
+	from pyvox.writer import VoxWriter
+	from pyvox.parser import VoxParser
+except:
+	print ("Opps - you need 'py-vox-io' get it from 'https://github.com/gromgull/py-vox-io'")
+	print ("Script will now exit")
+	print
+	sys.exit(0)
+
 import random
 import os,datetime, time, sys,math
-from pyvox.models import Vox
-from pyvox.writer import VoxWriter
-from pyvox.parser import VoxParser
-from numpy import zeros,newaxis,array
-from numpy import vstack,hstack,dstack
 from copy import deepcopy
 import glob
 
@@ -92,11 +106,11 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 					y = y + 1
 					continue
 				print (x,y,baseMatrix[x,y])
-				#input()
+				
 				if voxelColour >= 1:
 					brickCounter = brickCounter + 1
 					print ("Found Coloured Voxel (2)...")
-					#input()
+					
 					d = optimisationDictionary
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
@@ -109,26 +123,10 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 						if sliceValue%2 == 0:
 							brick = brick.reshape(brickX,brickY) # flips the array horizontal
 						#Find out the distances to the edge of the matrix		
-						#print ("DistancesToEndOfFile X and Y:",baseMatrix.shape[0] - x, baseMatrix.shape[1] - y)
-						#print ("DistancesToEndOfFile X and Y:",maxValue > baseMatrix.shape[0] - x, maxValue > baseMatrix.shape[1] - y)
-						#Print out all the values of the matrix and the brick
-						#print ("x:",x)
-						#print ("brickX:",brickX)
-						#print ("y:",y)
-						#print ("brickY:",brickY)
+
 						subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
 						subMatrixV = baseMatrix[x:x+brickY,y:y+brickX]
-						#print ("Horizontal Check SubMatrix")
-						#print (subMatrixH)
-						#print (subMatrixH.shape)
-						#print ()
-						#print ("Vertical Check SubMatrix")
-						#print (subMatrixV)
-						#print (subMatrixV.shape)
-						#print ()
-						#print (brick)
 
-						#print (brick.shape == subMatrixH.shape or brick.shape == subMatrixV.shape)
 						print ()
 						print (baseMatrix)
 						print ()
@@ -157,7 +155,6 @@ def optimiseSlice(baseMatrix,previousMatrix,sliceValue):
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
 									y = y + brickY
-									#input()
 									break
 								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
@@ -204,7 +201,6 @@ def getColourList(voxelColourRGB):
 		colourValueA = getattr(colourValues, 'a')
 		#print (colourValueR,",",colourValueG,",",colourValueB,",",colourValueA)
 		voxelRGBCodeDictionary[c+1] = (colourValueR,colourValueG,colourValueB)
-	#input()
 	return voxelRGBCodeDictionary
 
 #Read LDConfig File
@@ -244,7 +240,6 @@ def createCodeDictionary():
 	linesFromLDConfig = checkAndReadLDConfig()
 	for line in linesFromLDConfig:
 		if str(line)[0:4] == '0 !C' and ("ALPHA" or "RUBBER" or "MATERIAL" or "METAL" or "CHROME" or "PEARLESCENT") not in str(line):
-			#print (line[:-1])
 			first = "VALUE "
 			last = "   EDGE"
 			hexColour = find_between( line, first, last )
@@ -257,9 +252,7 @@ def createCodeDictionary():
 				legoColourCode =  int(find_between( line, first, last ))
 			except:
 				print ("invalid value - skipping...")
-			
 			#print ("CODE:",legoColourCode)
-			
 			legoRGBCodeDictionary[legoColourCode] = rgbValues
 			#print("============================================")
 	#print("Lego Colours From LDConfig.ldr")
@@ -278,14 +271,10 @@ def findClosestLegoColourCode(rgb,legoRGBCodeDictionary):
 		colourDistance = distance(rgb,dictRGB) #now compare the two rgb values
 		#print ("Colour Distance:",colourDistance)
 		comparisionDictionary[legoColourCode] = colourDistance	#Put the TLG colour code in a dictionary with the distance value
-
 		d = comparisionDictionary
 		sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)] # Reverse - Make sure the last value it spits out is the closest...
 		for key, value in sortedDictionary:
-			#print ("Key:", key, "Value:",value)
 			closestLegoCode = key
-		#print ("==================================")
-		#input()
 	return closestLegoCode
 
 def checkInput(nosOfFiles):
@@ -297,7 +286,6 @@ def checkInput(nosOfFiles):
 	else:
 		try:
 			numberChosen = int(userNumber)
-			#pass
 		except:
 			print ()
 			print ("Opps that's not a number")
@@ -321,7 +309,7 @@ def checkInput(nosOfFiles):
 		
 def getFile():
 	pathName = os.path.dirname(os.path.abspath(__file__))
-	# Find all the .bmps in the script folder...
+	# Find all the .vox files in the script folder...
 	fileList=[] 
 	nosOfFiles = 0
 	for file in sorted(glob.glob( os.path.join(pathName, '*.vox') )):
@@ -348,11 +336,10 @@ def getFile():
 
 
 ##################### MAIN CODE #####################
-#Read the .vox voxel file...
+#Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
 layerStop = 10000
-#initialFileName = "simple4.vox"
-#initialFileName = "yoshi_gox_CC01.vox"
+#Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
 print ("You chose: ", initialFileName)
@@ -376,8 +363,7 @@ print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
 print (nosOfVoxels)
 print ("Will continue in a second...")
-time.sleep(2)
-#input()
+time.sleep(2) # So you can see the total number of voxels...
 
 #Create a lookup table for the colours
 voxelColourRGB = voxelMatrix._palette
@@ -389,25 +375,13 @@ voxelRGBList = []
 numpyArrayForLego = numpy.zeros([x, y, z],dtype=int)
 for i in range(0,nosOfVoxels):
 	try:
-		#Pull out the relevant numbers from the .vox file (as I can't work out how to access it directly)
-		#voxelData = str(voxelMatrix.models[0][1][i])
-		#print (voxelData)
+		#Pull out the relevant numbers from the .vox file 
 		colour = getattr(voxelMatrix.models[0][1][i], 'c')
 		voxelX = getattr(voxelMatrix.models[0][1][i], 'z') # VoxelX = z - Weird I know but it's to do with the orienation of the model!	
 		voxelY = getattr(voxelMatrix.models[0][1][i], 'y') 
 		voxelZ = getattr(voxelMatrix.models[0][1][i], 'x') # voxelZ = x - Weird I know but it's to do with the orienation of the model!
 
 		print (colour, voxelX,voxelY,voxelZ)
-		#colourValueR = getattr(colourValues, 'r')
-		#colourValueG = getattr(colourValues, 'g')
-		#colourValueB = getattr(colourValues, 'b')
-		#colourValueA = getattr(colourValues, 'a')
-		#input()
-
-
-		#start = voxelData.find('c=') 
-		#end = voxelData.find(')', start)
-		#null,colour = voxelData[start:end].split('=')
 		
 		print ("===========Start Colour Conversion============")
 		print ("Voxel Colour Value",colour)
@@ -419,36 +393,12 @@ for i in range(0,nosOfVoxels):
 
 		colour = closestLegoCode
 		print ("Closest Lego Code Colour:",closestLegoCode)
-		#if closestLegoCode != 15:
-		#	if closestLegoCode != 212: 
-		#		if closestLegoCode != 10:	
-		#			input()
-		#input() # For Checking
-		print ("===========End Colour Conversion==========")
-
-		#start = voxelData.find('x=') 
-		#end = voxelData.find(', ', start)
-		#null,voxelZ = voxelData[start:end].split('=')
-		#print (voxelX)
-		
-		#start = voxelData.find('y=') 
-		#end = voxelData.find(',', start)
-		#null,voxelY = voxelData[start:end].split('=')
-		#print (voxelY)
-
-		#start = voxelData.find('z=') 
-		#end = voxelData.find(',', start)
-		#null,voxelX = voxelData[start:end].split('=')
-		#print (voxelZ)
-		
 		#Update the array with the colour values
 		numpyArrayForLego[int(voxelX),int(voxelY),int(voxelZ)] = colour
 	except Exception as e: 
-		#if "list index out of range" not in e:
 		#print(e)
 		#input()
 		print ("Assuming no voxel - skipping")
-		#input()
 #Print the primary numpy array
 print ("===========================================")
 print ("original",numpyArrayForLego)
@@ -479,7 +429,6 @@ optimisationDictionary["3622.DAT"]=[1,3]	#12 912
 optimisationDictionary["3004.DAT"]=[1,2]	#13 913
 optimisationDictionary["3005.DAT"]=[1,1]	#14 914
 	
-#print model.data[0,0,0] # Testing only
 #LDR Line example
 #1 69 -20 -24 -20 0 0 1 0 1 0 -1 0 0 3005.dat
 #Setup the basic LDR line...
@@ -493,7 +442,6 @@ m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
 #Set the part for each voxel - currently this only works for 1x1 bricks - now unused
 partID = "3005.dat" #Use 1x1 bricks
 
-
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 fileName = initialFileName[:-4] +"_" + dateTimeStamp + ".ldr" #Give every ldr fileName a timestamp
 fileName = initialFileName[:-4] + ".ldr" #Give every ldr file the SAME  fileName
@@ -503,7 +451,6 @@ ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9
 count = 0 # Used to count the total number of 1x1 bricks
 studMatrix = [] #Used to view slices (for humans!)
 sliceMatrix = []
-
 
 optimise = True
 #The following loops do the heavy lifting reading the .vox array and writing out the bricks to an ldr file...
@@ -518,11 +465,6 @@ while optimise:
 		sliceMatrix = numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1)
 		originalMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
 		previousMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
-
-		#sliceMatrix = numpyArrayForLego[z]
-		#originalMatrix = deepcopy(numpyArrayForLego[z])
-		#previousMatrix = deepcopy(numpyArrayForLego[z])
-
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
@@ -536,7 +478,6 @@ while optimise:
 		'''	
 		#Optimise the layer...
 		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
-
 		print ("OPTIMISATION COMPLETE...")
 		print
 		print ("Original Voxel Matrix Slice")
@@ -638,7 +579,7 @@ while optimise:
 			else:
 				width = x*20+((brickY/2)*20)-correctionX #Convert x and y into lego dimensions
 				depth = y*20-correctionY #Convert x and y into lego dimensions
-				#Change the rotation of the brick
+				#Change the rotation of the brick - Example below...
 				#90 brickRotate 1 4 20 -104 20 -1 0 0 0 1 0 0 0 -1 3001.dat	
 				m1 = -1;m2 = 0;m3 = 0;m4 = 0;m5 = 1;m6 = 0;m7 = 0;m8 = 0;m9 = -1
 				#Create the ldrLine
@@ -650,7 +591,6 @@ while optimise:
 				LDrawFile.close()
 			#Write the LDR name to file...	
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
-			
 			print ("countBrick:",countBrick)
 			if z >= layerStop:
 				input() # USEFUL FOR CHECKING EACH BRICK ADDITION
@@ -661,7 +601,6 @@ while optimise:
 		brickRotate = 0
 		previousMatrix =  deepcopy(sliceMatrix)
 		sliceMatrix = deepcopy(originalMatrix)
-		
 		#Reset the rotation values - this is important otherwise the rotation "sticks" on the next layer!
 		m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
 		print ("Layer: ",heightOfMatrix)			
