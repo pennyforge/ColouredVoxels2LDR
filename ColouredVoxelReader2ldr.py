@@ -1,3 +1,6 @@
+#ColouredVoxel2LDR Converter
+#Neil Marsden Feb 2017
+
 try: # Check for numpy
 	import numpy 
 	from numpy import zeros,newaxis,array
