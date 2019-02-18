@@ -338,6 +338,102 @@ def getFile():
 	return (nameOfFile)	
 
 
+def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
+	print ("Optimising Layer to remove 1x1 bricks...")
+	print ("baseMatrix\n",baseMatrix)
+	print ("Colour Marix\n",colourMatrix)
+	print ("sliceValue\n",sliceValue)
+	print ("optimisedBrickData\n",optimisedBrickData)
+	input()
+	x = 0
+	y = 0
+	optimise = True
+	brickCounter = 0
+	dictionaryCounter = 902
+	while optimise:
+		while x < baseMatrix.shape[0]: # Use a while loop rather than a for loop as it gives you more control moving through the loop
+			while y < baseMatrix.shape[1]:
+				voxel_1x1 = int(baseMatrix[x,y])
+				print (voxel_1x1)
+				if voxel_1x1 == 914: #which is a 1x1 brick
+					print ("Found 1x1")
+					print (x,y)
+					#Get the colour value for the matching 1x1 voxel using optimised brick data
+					remapVoxelColour = colourMatrix[x,y]
+					print (remapVoxelColour)
+					brickCounter = brickCounter + 1
+					print ("Found Coloured Voxel (3)...")
+					
+					d = optimisationDictionary
+					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
+					for key, value in sortedDictionary:
+						if key == "3622.DAT" or key == "3004.DAT": # Only match 1x3 and 1x2 bricks - this should add strength
+							dictionaryCounter = dictionaryCounter + 1
+							#check the shapes around the voxel 
+							brickX,brickY = value
+							brick = brickMatrix(brickX,brickY,remapVoxelColour)
+							maxValue = max(value)
+							print (brick.shape)
+							if sliceValue%2 != 0:
+								brick = brick.reshape(brickX,brickY) # flips the array horizontal
+							#Find out the distances to the edge of the matrix		
+
+							subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
+							subMatrixV = baseMatrix[x:x+brickY,y:y+brickX]
+
+							print ()
+							print (baseMatrix)
+							print ()
+							#print (previousMatrix) 
+							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
+							try:
+								if numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
+									print ("MATCH HORIZONTAL!")
+									rotate = 0
+									#print (key, dictionaryCounter)
+									baseMatrix[x:x+brickX,y:y+brickY] = dictionaryCounter
+									#print ("baseMatrix")
+									#print (baseMatrix)
+									dictionaryCounter = 902
+									print (x,y)
+									#optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									print("jump here by...",brickY)
+									# you matched a brick but now you need to jump the while loop...
+									y = y + brickY
+									break
+								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
+									print ("MATCH VERTICAL!")
+									rotate = 1
+									#print (key, dictionaryCounter)
+									#print (dictionaryCounter)
+									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
+									#print (baseMatrix)
+									dictionaryCounter = 902
+									#print (x,y)
+									#optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									print("jump here by...",brickX)
+									y = y + brickX
+									#input()
+									break
+								else:
+									print ("Brick won't fit - trying next brick...")
+									print ("======================================")
+							except Exception as e:
+								print ("<<<<<<<<<<<<<-", e,"->>>>>>>>>>>>>>>")
+								print ("Brick won't fit on matrix anyway- trying next brick...")
+								print ("======================================")								
+						else:
+							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
+							pass
+
+				y = y + 1
+			x = x + 1
+	print(baseMatrix)	
+	#for bricks in optimisedBrickData:
+	
+	
+	return (baseMatrix,previousMatrix)	
+
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
@@ -468,6 +564,7 @@ while optimise:
 		sliceMatrix = numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1)
 		originalMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
 		previousMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
+		originalColourMatrix = deepcopy(sliceMatrix)
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
@@ -481,6 +578,9 @@ while optimise:
 		'''	
 		#Optimise the layer...
 		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
+		#Clean up the remaining 1x1 bricks
+		Test01,Test02 = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData)
+
 		print ("OPTIMISATION COMPLETE...")
 		print
 		print ("Original Voxel Matrix Slice")
@@ -490,7 +590,7 @@ while optimise:
 		print (sliceMatrix)		
 		print	
 		sliceMatrix = deepcopy(originalMatrix)
-		#input()
+		input()
 		if z >= layerStop:
 			input() #USEFUL FOR CHECKING EACH LAYER
 		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
