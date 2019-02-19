@@ -461,10 +461,35 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ()
 			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
 			input()
+			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData)
+			optimise = False
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
-	
-	
-	return (baseMatrix,previousMatrix)	
+	return (remapOptimisedBrickData,optimisedBrickData)	
+
+def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
+	#newOptimisedBrickData = optimisedBrickData
+	deletionList = []
+	for i,brickData in enumerate(optimisedBrickData):
+		for remapBrickData in remapOptimisedBrickData:
+			if brickData == remapBrickData:
+				null = 0
+				#print ("MATCH",brickData)
+			else:
+				#print ("No match")
+				if "3005.DAT" in brickData:
+					#print ("Deleting",i,brickData,"from optimisedBrickData")
+					if i not in deletionList:
+						deletionList.append(i)
+					#del newOptimisedBrickData[i]
+	#print ("Deletion list:",deletionList)
+	for i in sorted(deletionList, reverse=True):
+		del optimisedBrickData[i]
+	#print (optimisedBrickData)
+	optimisedBrickData = optimisedBrickData + remapOptimisedBrickData
+	print ("Final optimisedBrickData:",optimisedBrickData)
+
+	input("Wait at the end of comparing lists...")
+	return (optimisedBrickData)			
 
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
@@ -611,7 +636,7 @@ while optimise:
 		#Optimise the layer...
 		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
 		#Clean up the remaining 1x1 bricks
-		Test01,Test02 = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData)
+		sliceMatrix,optimisedBrickData = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData)
 
 		print ("OPTIMISATION COMPLETE...")
 		print
