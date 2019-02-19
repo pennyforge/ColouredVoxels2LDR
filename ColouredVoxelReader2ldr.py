@@ -395,7 +395,10 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
 									match = 1
-									rotate = 1
+									if key == "3005.DAT": #Don't rotate the 1x1 bricks - there is no point
+										rotate = 0
+									else:
+										rotate = 1
 									print (key, dictionaryCounter)
 									print (dictionaryCounter)
 									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
