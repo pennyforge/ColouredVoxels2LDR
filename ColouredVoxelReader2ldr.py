@@ -351,6 +351,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 	remapOptimisedBrickData = []
 	optimise = True
 	brickCounter = 0
+	match = 0
 	dictionaryCounter = 902
 	processLayer = baseMatrix.shape[0]*baseMatrix.shape[1]
 	processLayerCount = 0
@@ -372,7 +373,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
 						dictionaryCounter = dictionaryCounter + 1
-						if key == "3622.DAT" or key == "3004.DAT": # Only match 1x3 and 1x2 bricks - this should add strength
+						if key == "3622.DAT" or key == "3004.DAT" or key == "3005.DAT": # Only match 1x3 or 1x2 or 1x1 (which can't be optimised) bricks - this should add strength
 							#check the shapes around the voxel 
 							brickX,brickY = value
 							brick = brickMatrix(brickX,brickY,remapVoxelColour)
@@ -393,6 +394,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							try:
 								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
 									print ("MATCH VERTICAL!")
+									match = 1
 									rotate = 1
 									print (key, dictionaryCounter)
 									print (dictionaryCounter)
@@ -408,6 +410,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 								brick = brick.reshape(brickY,brickX)
 								if numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
 									print ("MATCH HORIZONTAL!")
+									match = 1
 									rotate = 0
 									#print (key, dictionaryCounter)
 									baseMatrix[x:x+brickX,y:y+brickY] = dictionaryCounter
@@ -429,13 +432,14 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 								print ("======================================")								
 						else:
 							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
-							pass
+							pass	
 				y = y + 1
 			print(baseMatrix)
 			print()
 			print(x,y)	
 			x = x + 1
 			y = 0
+			match = 0
 		processLayerCount = processLayerCount + 1
 		print ("Rechecked the layer:",processLayerCount,"time")
 		if processLayerCount == processLayer:
@@ -450,6 +454,10 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ()
 			print("Second Pass Optimisation complete...")
 			input()	
+			print ("optimisedBrickData\n",optimisedBrickData)
+			print ()
+			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
+			input()
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
 	
 	
