@@ -409,7 +409,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickX)
-									#y = y + brickX
+									y = y + brickX
 									#input()
 									break
 								#brick = brick.reshape(brickY,brickX)
@@ -426,7 +426,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
-									#y = y + brickY
+									y = y + brickY
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -496,7 +496,7 @@ def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
-layerStop = 10000
+layerStop = 3
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
@@ -691,6 +691,11 @@ while optimise:
 					secondPassRotateCorrection = 1
 					#correctionY = -20
 					#correctionX = 30
+				if z%2 != 0 and brickX ==1 and brickY == 2 and brickRotate == 0:
+					print ("Found Second Pass 1x2 - Rotating...")
+					secondPassRotateCorrection = 1
+					#correctionY = -20
+					#correctionX = 30	
 			if brickY%2 != 0 and brickX !=1 and brickY !=1:
 				print ("EVEN")
 				correctionY = 10
