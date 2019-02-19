@@ -358,9 +358,9 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 	while optimise:
 		while x < baseMatrix.shape[0]: # Use a while loop rather than a for loop as it gives you more control moving through the loop
 			while y < baseMatrix.shape[1]:
-				voxel_1x1 = int(baseMatrix[x,y])
-				print (voxel_1x1)
-				if voxel_1x1 == 914: #which is a 1x1 brick
+				voxel = int(baseMatrix[x,y])
+				print (voxel)
+				if voxel == 914: #which is a 1x1 brick
 					print ("Found 1x1")
 					print (x,y)
 					#Get the colour value for the matching 1x1 voxel using optimised brick data
@@ -379,8 +379,10 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							brick = brickMatrix(brickX,brickY,remapVoxelColour)
 							maxValue = max(value)
 							print (brick.shape)
-							if sliceValue%2 != 0:
+							if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
 								brick = brick.reshape(brickX,brickY) # flips the array horizontal
+							#else:
+							#	brick = brick.reshape(brickY,brickX)
 							#Find out the distances to the edge of the matrix		
 
 							subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
@@ -407,11 +409,11 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickX)
-									y = y + brickX
+									#y = y + brickX
 									#input()
 									break
-								brick = brick.reshape(brickY,brickX)
-								if numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
+								#brick = brick.reshape(brickY,brickX)
+								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
 									print ("MATCH HORIZONTAL!")
 									match = 1
 									rotate = 0
@@ -424,7 +426,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
-									y = y + brickY
+									#y = y + brickY
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -435,7 +437,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 								print ("======================================")								
 						else:
 							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
-							pass	
+							#pass	
 				y = y + 1
 			print(baseMatrix)
 			print()
@@ -456,12 +458,12 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ("baseMatrix\n",baseMatrix)
 			print ()
 			print("Second Pass Optimisation complete...")
-			input()	
+			#input()	
 			print ("optimisedBrickData\n",optimisedBrickData)
 			print ()
 			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
-			input()
-			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData)
+			#input()
+			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData) #Rebuild the optimisedBrickData list using the new data...
 			optimise = False
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
 	return (remapOptimisedBrickData,optimisedBrickData)	
@@ -488,7 +490,7 @@ def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
 	optimisedBrickData = optimisedBrickData + remapOptimisedBrickData
 	print ("Final optimisedBrickData:",optimisedBrickData)
 
-	input("Wait at the end of comparing lists...")
+	#input("Wait at the end of comparing lists...")
 	return (optimisedBrickData)			
 
 ##################### MAIN CODE #####################
@@ -517,7 +519,7 @@ x = voxelMatrix.models[0][0][2]
 print ()
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
-print (nosOfVoxels)
+print ("TOTAL NUMBER OF VOXELS:",nosOfVoxels)
 print ("Will continue in a second...")
 time.sleep(2) # So you can see the total number of voxels...
 
@@ -647,16 +649,19 @@ while optimise:
 		print (sliceMatrix)		
 		print	
 		sliceMatrix = deepcopy(originalMatrix)
-		input()
+		#input()
 		if z >= layerStop:
 			input() #USEFUL FOR CHECKING EACH LAYER
 		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
 		countBrick = 0
+		secondPassRotateCorrection = 0
 		for brick in optimisedBrickData:
 			countBrick = countBrick + 1
-			print (brick)
-			print ()
+			print()
+			print("Brick data from optimisedBrickData...")
+			print ("Brick",brick,"Layer",z)
 			print (brick[0],brick[1],brick[2],brick[3],brick[4],brick[5],brick[6])
+			#print ()
 			#Assign the variables for each element in optimisedBrickData  
 			partID = brick[0]
 			x = brick[1]
@@ -674,14 +679,20 @@ while optimise:
 			#MAKE ADJUSTMENTS DEPENDING ON BRICK SIZE 
 			correctionX = 0
 			correctionY = 0
-			
+			print (brickX, brickX%2)
+
 			if brickX%2 != 0:
-				print ("EVEN")
+				print ("ODD")
 				correctionX = 10
 				if z%2 != 0:
 					correctionX = 10
+				if z%2 != 0 and brickX ==1 and brickY == 3 and brickRotate == 0:
+					print ("Found Second Pass 1x3 - Rotating...")
+					secondPassRotateCorrection = 1
+					#correctionY = -20
+					#correctionX = 30
 			if brickY%2 != 0 and brickX !=1 and brickY !=1:
-				print ("ODD")
+				print ("EVEN")
 				correctionY = 10
 				if z%2 != 0:
 					print ("EVEN 3x2")
@@ -732,6 +743,11 @@ while optimise:
 				correctionX = correctionX + 10
 				
 			if brickRotate == 0:
+				if secondPassRotateCorrection == 1: #Rotate second pass 1x3 bricks
+					print ("Fixing second pass rotation...")
+					#m1 = -1;m2 = 0;m3 = 0;m4 = 0;m5 = 1;m6 = 0;m7 = 0;m8 = 0;m9 = -1
+					m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
+					secondPassRotateCorrection = 0
 				width = width - correctionX
 				depth = depth + correctionY
 				ldrLine = activeLine(active,brickColour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
@@ -752,9 +768,11 @@ while optimise:
 			#Write the LDR name to file...	
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
 			print ("countBrick:",countBrick)
+			#input("Part written to ldr...")
 			if z >= layerStop:
 				input() # USEFUL FOR CHECKING EACH BRICK ADDITION
 			legoWriter(fileName,dateTimeStamp,'0 STEP')
+		#input("Layer written to ldr...")
 		z = z + 1
 		#count = count + 1
 		optimisedBrickData = []
