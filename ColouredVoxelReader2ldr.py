@@ -400,7 +400,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (baseMatrix)
 									dictionaryCounter = 902
 									#print (x,y)
-									#remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickX)
 									y = y + brickX
 									#input()
@@ -415,7 +415,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (baseMatrix)
 									dictionaryCounter = 902
 									print (x,y)
-									#remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
 									y = y + brickY
@@ -437,7 +437,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			x = x + 1
 			y = 0
 		processLayerCount = processLayerCount + 1
-		print ("Recheck the layer for the:",processLayerCount,"time")
+		print ("Rechecked the layer:",processLayerCount,"time")
 		if processLayerCount == processLayer:
 			optimise = False
 			break
