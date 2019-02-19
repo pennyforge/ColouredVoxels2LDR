@@ -344,12 +344,16 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 	print ("Colour Marix\n",colourMatrix)
 	print ("sliceValue\n",sliceValue)
 	print ("optimisedBrickData\n",optimisedBrickData)
-	input()
+	originalMatrix = deepcopy(baseMatrix)
+	#input()
 	x = 0
 	y = 0
+	remapOptimisedBrickData = []
 	optimise = True
 	brickCounter = 0
 	dictionaryCounter = 902
+	processLayer = baseMatrix.shape[0]*baseMatrix.shape[1]
+	processLayerCount = 0
 	while optimise:
 		while x < baseMatrix.shape[0]: # Use a while loop rather than a for loop as it gives you more control moving through the loop
 			while y < baseMatrix.shape[1]:
@@ -363,12 +367,12 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 					print (remapVoxelColour)
 					brickCounter = brickCounter + 1
 					print ("Found Coloured Voxel (3)...")
-					
+					#Work through the parts dictionary...
 					d = optimisationDictionary
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
+						dictionaryCounter = dictionaryCounter + 1
 						if key == "3622.DAT" or key == "3004.DAT": # Only match 1x3 and 1x2 bricks - this should add strength
-							dictionaryCounter = dictionaryCounter + 1
 							#check the shapes around the voxel 
 							brickX,brickY = value
 							brick = brickMatrix(brickX,brickY,remapVoxelColour)
@@ -387,6 +391,21 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							#print (previousMatrix) 
 							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
 							try:
+								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
+									print ("MATCH VERTICAL!")
+									rotate = 1
+									print (key, dictionaryCounter)
+									print (dictionaryCounter)
+									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
+									#print (baseMatrix)
+									dictionaryCounter = 902
+									#print (x,y)
+									#remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									print("jump here by...",brickX)
+									y = y + brickX
+									#input()
+									break
+								brick = brick.reshape(brickY,brickX)
 								if numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
 									print ("MATCH HORIZONTAL!")
 									rotate = 0
@@ -396,24 +415,10 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (baseMatrix)
 									dictionaryCounter = 902
 									print (x,y)
-									#optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
+									#remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
 									y = y + brickY
-									break
-								elif numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
-									print ("MATCH VERTICAL!")
-									rotate = 1
-									#print (key, dictionaryCounter)
-									#print (dictionaryCounter)
-									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
-									#print (baseMatrix)
-									dictionaryCounter = 902
-									#print (x,y)
-									#optimisedBrickData.append([key,x,y,brickX,brickY,rotate,voxelColour])
-									print("jump here by...",brickX)
-									y = y + brickX
-									#input()
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -425,11 +430,27 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 						else:
 							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
 							pass
-
 				y = y + 1
+			print(baseMatrix)
+			print()
+			print(x,y)	
 			x = x + 1
-	print(baseMatrix)	
-	#for bricks in optimisedBrickData:
+			y = 0
+		processLayerCount = processLayerCount + 1
+		print ("Recheck the layer for the:",processLayerCount,"time")
+		if processLayerCount == processLayer:
+			optimise = False
+			break
+		else:
+			print ("Colour Matrix\n",colourMatrix)
+			print ()
+			print ("Original Matrix\n",originalMatrix)
+			print ()
+			print ("baseMatrix\n",baseMatrix)
+			print ()
+			print("Second Pass Optimisation complete...")
+			input()	
+		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
 	
 	
 	return (baseMatrix,previousMatrix)	
