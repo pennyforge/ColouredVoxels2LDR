@@ -409,7 +409,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickX)
-									y = y + brickX
+									#y = y + brickX
 									#input()
 									break
 								#brick = brick.reshape(brickY,brickX)
@@ -422,11 +422,11 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#print ("baseMatrix")
 									#print (baseMatrix)
 									dictionaryCounter = 902
-									print (x,y)
+									#print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
-									y = y + brickY
+									#y = y + brickY
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
@@ -462,7 +462,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ("optimisedBrickData\n",optimisedBrickData)
 			print ()
 			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
-			#input()
+			input()
 			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData) #Rebuild the optimisedBrickData list using the new data...
 			optimise = False
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
@@ -496,7 +496,7 @@ def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
-layerStop = 3
+layerStop = 0
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
