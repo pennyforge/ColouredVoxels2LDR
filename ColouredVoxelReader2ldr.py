@@ -434,7 +434,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 
 									#brick = brick.reshape(brickX,brickY)
 								#elif numpy.array_equal(brick,subMatrixColourV):
-								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
+								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape and numpy.array_equal(brick,subMatrixColourH):
 									print ("MATCH HORIZONTAL - SECOND PASS!!")
 									
 									match = 1
@@ -528,7 +528,7 @@ def doubleCheckBrickMatch(x,y,):
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
-layerStop = 10000
+layerStop = 1
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
