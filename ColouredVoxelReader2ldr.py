@@ -388,29 +388,36 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 
 							subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
 							subMatrixV = baseMatrix[x:x+brickY,y:y+brickX]
+							subMatrixColourH = colourMatrix[x:x+brickX,y:y+brickY]
+							subMatrixColourV = colourMatrix[x:x+brickY,y:y+brickX]
 
 							print ()
 							print (baseMatrix)
 							print ()
 							print ("Sub H :\n",subMatrixH)
 							print ("Sub V :\n",subMatrixV)
-
+							print ("Sub H Colour :\n",subMatrixColourH)
+							print ("Sub V Colour :\n",subMatrixColourV)
+							print ("brick",brick)
+							
 							#print (previousMatrix) 
 							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
 							try:
-								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
+								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape and numpy.array_equal(brick,subMatrixColourV):
+								#if numpy.array_equal(brick,subMatrixColourV):
+								#if (subMatrixV == subMatrixColourV).all():
 									print ("MATCH VERTICAL - SECOND PASS!")
 									print ("Brick:\n",brick)
-									
+									#input("Vertical match on second pass")
 									match = 1
 									if key == "3005.DAT": #Don't rotate the 1x1 bricks - there is no point
 										rotate = 0
 									else:
 										rotate = 1
-									if x == 10 and y == 3:
-										print ("colourMatrix:\n",colourMatrix)
-										print()
-										print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
+									
+									print ("colourMatrix:\n",colourMatrix)
+									print()
+									print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
 									print (key, dictionaryCounter)
 									print (dictionaryCounter)
 									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
@@ -420,10 +427,11 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
 									#print("jump here by...",brickX)
 									#y = y + brickX
-									input()
+									#if x == 10 and y == 3:
+									#	input()
 									break
 								#brick = brick.reshape(brickY,brickX)
-								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
+								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH):
 									print ("MATCH HORIZONTAL - SECOND PASS!!")
 									match = 1
 									rotate = 0
@@ -444,7 +452,8 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							except Exception as e:
 								print ("<<<<<<<<<<<<<-", e,"->>>>>>>>>>>>>>>")
 								print ("Brick won't fit on matrix anyway- trying next brick...")
-								print ("======================================")								
+								print ("======================================")
+								#input()								
 						else:
 							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
 							#pass	
@@ -452,8 +461,8 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print(baseMatrix)
 			print()
 			print(x,y)	
-			if x == 10 and y == 3:
-				input()
+			#if x == 10 and y == 3:
+			#input()
 			x = x + 1
 			y = 0
 			match = 0
@@ -474,7 +483,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ("optimisedBrickData\n",optimisedBrickData)
 			print ()
 			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
-			input()
+			#input()
 			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData) #Rebuild the optimisedBrickData list using the new data...
 			optimise = False
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
@@ -505,10 +514,13 @@ def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
 	#input("Wait at the end of comparing lists...")
 	return (optimisedBrickData)			
 
+def doubleCheckBrickMatch(x,y,):
+	print ("Unused")
+
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
-layerStop = 0
+layerStop = 10000
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
@@ -531,7 +543,7 @@ x = voxelMatrix.models[0][0][2]
 print ()
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
-print ("TOTAL NUMBER OF VOXELS:",nosOfVoxels)
+print ("TOTAL NUMBER OF POSSIBLE VOXELS:",nosOfVoxels)
 print ("Will continue in a second...")
 time.sleep(2) # So you can see the total number of voxels...
 
