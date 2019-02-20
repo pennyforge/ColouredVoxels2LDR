@@ -380,12 +380,13 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							maxValue = max(value)
 							print (brick.shape)
 							#input()
-							#if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
-							#	brick = brick.reshape(brickX,brickY) # flips the array horizontal
+							if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
+								brick = brick.reshape(brickX,brickY) # flips the array horizontal
 							#else:
-							#	brick = brick.reshape(brickY,brickX)
+								#brick = brick.reshape(brickY,brickX)
 							#Find out the distances to the edge of the matrix		
-
+							print("z,brick\n",sliceValue,brick)
+							#input()
 							subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
 							subMatrixV = baseMatrix[x:x+brickY,y:y+brickX]
 							subMatrixColourH = colourMatrix[x:x+brickX,y:y+brickY]
@@ -398,7 +399,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							print ("Sub V :\n",subMatrixV)
 							print ("Sub H Colour :\n",subMatrixColourH)
 							print ("Sub V Colour :\n",subMatrixColourV)
-							print ("brick",brick)
+							print ("brick\n",brick)
 							
 							#print (previousMatrix) 
 							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
@@ -430,21 +431,28 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									#if x == 10 and y == 3:
 									#	input()
 									break
-								#brick = brick.reshape(brickY,brickX)
-								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH):
+
+									#brick = brick.reshape(brickX,brickY)
+								#elif numpy.array_equal(brick,subMatrixColourV):
+								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
 									print ("MATCH HORIZONTAL - SECOND PASS!!")
+									
 									match = 1
 									rotate = 0
 									#print (key, dictionaryCounter)
+									print ("Brick:\n",brick)
+									print ("colourMatrix:\n",colourMatrix)
+									print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
 									baseMatrix[x:x+brickX,y:y+brickY] = dictionaryCounter
 									#print ("baseMatrix")
 									#print (baseMatrix)
 									dictionaryCounter = 902
 									#print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
-									print("jump here by...",brickY)
+									#print("jump here by...",brickY)
 									# you matched a brick but now you need to jump the while loop...
 									#y = y + brickY
+									#input("Horizontal match on second pass")
 									break
 								else:
 									print ("Brick won't fit - trying next brick...")
