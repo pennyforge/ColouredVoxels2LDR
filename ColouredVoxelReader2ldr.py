@@ -379,8 +379,9 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							brick = brickMatrix(brickX,brickY,remapVoxelColour)
 							maxValue = max(value)
 							print (brick.shape)
-							if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
-								brick = brick.reshape(brickX,brickY) # flips the array horizontal
+							#input()
+							#if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
+							#	brick = brick.reshape(brickX,brickY) # flips the array horizontal
 							#else:
 							#	brick = brick.reshape(brickY,brickX)
 							#Find out the distances to the edge of the matrix		
@@ -391,30 +392,39 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 							print ()
 							print (baseMatrix)
 							print ()
+							print ("Sub H :\n",subMatrixH)
+							print ("Sub V :\n",subMatrixV)
+
 							#print (previousMatrix) 
 							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
 							try:
 								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape:
-									print ("MATCH VERTICAL!")
+									print ("MATCH VERTICAL - SECOND PASS!")
+									print ("Brick:\n",brick)
+									
 									match = 1
 									if key == "3005.DAT": #Don't rotate the 1x1 bricks - there is no point
 										rotate = 0
 									else:
 										rotate = 1
+									if x == 10 and y == 3:
+										print ("colourMatrix:\n",colourMatrix)
+										print()
+										print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
 									print (key, dictionaryCounter)
 									print (dictionaryCounter)
 									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
-									#print (baseMatrix)
+									print (baseMatrix)
 									dictionaryCounter = 902
-									#print (x,y)
+									print (x,y)
 									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
-									print("jump here by...",brickX)
+									#print("jump here by...",brickX)
 									#y = y + brickX
-									#input()
+									input()
 									break
 								#brick = brick.reshape(brickY,brickX)
 								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape:
-									print ("MATCH HORIZONTAL!")
+									print ("MATCH HORIZONTAL - SECOND PASS!!")
 									match = 1
 									rotate = 0
 									#print (key, dictionaryCounter)
@@ -442,6 +452,8 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print(baseMatrix)
 			print()
 			print(x,y)	
+			if x == 10 and y == 3:
+				input()
 			x = x + 1
 			y = 0
 			match = 0
