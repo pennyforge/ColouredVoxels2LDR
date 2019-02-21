@@ -528,7 +528,7 @@ def doubleCheckBrickMatch(x,y,):
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
-layerStop = 1
+layerStop = 10000
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
