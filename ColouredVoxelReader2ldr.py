@@ -338,6 +338,193 @@ def getFile():
 	return (nameOfFile)	
 
 
+def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
+	print ("Optimising Layer to remove 1x1 bricks...")
+	print ("baseMatrix\n",baseMatrix)
+	print ("Colour Marix\n",colourMatrix)
+	print ("sliceValue\n",sliceValue)
+	print ("optimisedBrickData\n",optimisedBrickData)
+	originalMatrix = deepcopy(baseMatrix)
+	#input()
+	x = 0
+	y = 0
+	remapOptimisedBrickData = []
+	optimise = True
+	brickCounter = 0
+	match = 0
+	dictionaryCounter = 902
+	processLayer = baseMatrix.shape[0]*baseMatrix.shape[1]
+	processLayerCount = 0
+	while optimise:
+		while x < baseMatrix.shape[0]: # Use a while loop rather than a for loop as it gives you more control moving through the loop
+			while y < baseMatrix.shape[1]:
+				voxel = int(baseMatrix[x,y])
+				print (voxel)
+				if voxel == 914: #which is a 1x1 brick
+					print ("Found 1x1")
+					print (x,y)
+					#Get the colour value for the matching 1x1 voxel using optimised brick data
+					remapVoxelColour = colourMatrix[x,y]
+					print (remapVoxelColour)
+					brickCounter = brickCounter + 1
+					print ("Found Coloured Voxel (3)...")
+					#Work through the parts dictionary...
+					d = optimisationDictionary
+					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
+					for key, value in sortedDictionary:
+						dictionaryCounter = dictionaryCounter + 1
+						if key == "3622.DAT" or key == "3004.DAT" or key == "3005.DAT": # Only match 1x3 or 1x2 or 1x1 (which can't be optimised) bricks - this should add strength
+							#check the shapes around the voxel 
+							brickX,brickY = value
+							brick = brickMatrix(brickX,brickY,remapVoxelColour)
+							maxValue = max(value)
+							print (brick.shape)
+							#input()
+							if sliceValue%2 != 0: #or sliceValue%2 == 0: # Do it for every layer...##########################################################################
+								brick = brick.reshape(brickX,brickY) # flips the array horizontal
+							#else:
+								#brick = brick.reshape(brickY,brickX)
+							#Find out the distances to the edge of the matrix		
+							print("z,brick\n",sliceValue,brick)
+							#input()
+							subMatrixH = baseMatrix[x:x+brickX,y:y+brickY]
+							subMatrixV = baseMatrix[x:x+brickY,y:y+brickX]
+							subMatrixColourH = colourMatrix[x:x+brickX,y:y+brickY]
+							subMatrixColourV = colourMatrix[x:x+brickY,y:y+brickX]
+
+							print ()
+							print (baseMatrix)
+							print ()
+							print ("Sub H :\n",subMatrixH)
+							print ("Sub V :\n",subMatrixV)
+							print ("Sub H Colour :\n",subMatrixColourH)
+							print ("Sub V Colour :\n",subMatrixColourV)
+							print ("brick\n",brick)
+							
+							#print (previousMatrix) 
+							# Check to see if  this layer and the previous layer are the same - if so discard the largest brick (to try to solve the weak corner problem)
+							try:
+								if numpy.amax(subMatrixV) == numpy.amin(subMatrixV) and brick.shape == subMatrixV.shape and numpy.array_equal(brick,subMatrixColourV):
+								#if numpy.array_equal(brick,subMatrixColourV):
+								#if (subMatrixV == subMatrixColourV).all():
+									print ("MATCH VERTICAL - SECOND PASS!")
+									print ("Brick:\n",brick)
+									#input("Vertical match on second pass")
+									match = 1
+									if key == "3005.DAT": #Don't rotate the 1x1 bricks - there is no point
+										rotate = 0
+									else:
+										rotate = 1
+									
+									print ("colourMatrix:\n",colourMatrix)
+									print()
+									print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
+									print (key, dictionaryCounter)
+									print (dictionaryCounter)
+									baseMatrix[x:x+brickY,y:y+brickX] = dictionaryCounter
+									print (baseMatrix)
+									dictionaryCounter = 902
+									print (x,y)
+									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
+									#print("jump here by...",brickX)
+									#y = y + brickX
+									#if x == 10 and y == 3:
+									#	input()
+									break
+
+									#brick = brick.reshape(brickX,brickY)
+								#elif numpy.array_equal(brick,subMatrixColourV):
+								elif numpy.amax(subMatrixH) == numpy.amin(subMatrixH) and brick.shape == subMatrixH.shape and numpy.array_equal(brick,subMatrixColourH):
+									print ("MATCH HORIZONTAL - SECOND PASS!!")
+									
+									match = 1
+									rotate = 0
+									#print (key, dictionaryCounter)
+									print ("Brick:\n",brick)
+									print ("colourMatrix:\n",colourMatrix)
+									print ("max subV:",numpy.amax(subMatrixV),"min subV:",numpy.amin(subMatrixV),"brick shape",brick.shape,"subV shape",subMatrixV.shape)
+									baseMatrix[x:x+brickX,y:y+brickY] = dictionaryCounter
+									#print ("baseMatrix")
+									#print (baseMatrix)
+									dictionaryCounter = 902
+									#print (x,y)
+									remapOptimisedBrickData.append([key,x,y,brickX,brickY,rotate,remapVoxelColour])
+									#print("jump here by...",brickY)
+									# you matched a brick but now you need to jump the while loop...
+									#y = y + brickY
+									#input("Horizontal match on second pass")
+									break
+								else:
+									print ("Brick won't fit - trying next brick...")
+									print ("======================================")
+							except Exception as e:
+								print ("<<<<<<<<<<<<<-", e,"->>>>>>>>>>>>>>>")
+								print ("Brick won't fit on matrix anyway- trying next brick...")
+								print ("======================================")
+								#input()								
+						else:
+							print ("We're only interested in 1x2 and 1x3 for this fix...skipping other bricks...")
+							#pass	
+				y = y + 1
+			print(baseMatrix)
+			print()
+			print(x,y)	
+			#if x == 10 and y == 3:
+			#input()
+			x = x + 1
+			y = 0
+			match = 0
+		processLayerCount = processLayerCount + 1
+		print ("Rechecked the layer:",processLayerCount,"time")
+		if processLayerCount == processLayer:
+			optimise = False
+			break
+		else:
+			print ("Colour Matrix\n",colourMatrix)
+			print ()
+			print ("Original Matrix\n",originalMatrix)
+			print ()
+			print ("baseMatrix\n",baseMatrix)
+			print ()
+			print("Second Pass Optimisation complete...")
+			#input()	
+			print ("optimisedBrickData\n",optimisedBrickData)
+			print ()
+			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
+			#input()
+			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData) #Rebuild the optimisedBrickData list using the new data...
+			optimise = False
+		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
+	return (remapOptimisedBrickData,optimisedBrickData)	
+
+def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
+	#newOptimisedBrickData = optimisedBrickData
+	deletionList = []
+	for i,brickData in enumerate(optimisedBrickData):
+		for remapBrickData in remapOptimisedBrickData:
+			if brickData == remapBrickData:
+				null = 0
+				#print ("MATCH",brickData)
+			else:
+				#print ("No match")
+				if "3005.DAT" in brickData:
+					#print ("Deleting",i,brickData,"from optimisedBrickData")
+					if i not in deletionList:
+						deletionList.append(i)
+					#del newOptimisedBrickData[i]
+	#print ("Deletion list:",deletionList)
+	for i in sorted(deletionList, reverse=True):
+		del optimisedBrickData[i]
+	#print (optimisedBrickData)
+	optimisedBrickData = optimisedBrickData + remapOptimisedBrickData
+	print ("Final optimisedBrickData:",optimisedBrickData)
+
+	#input("Wait at the end of comparing lists...")
+	return (optimisedBrickData)			
+
+def doubleCheckBrickMatch(x,y,):
+	print ("Unused")
+
 ##################### MAIN CODE #####################
 #Set up the colour dictionary...
 legoRGBCodeDictionary = createCodeDictionary()
@@ -364,7 +551,7 @@ x = voxelMatrix.models[0][0][2]
 print ()
 print ("Matrix Dimensions: X",x,"*Y",y,"*Z",z,"(1)")
 nosOfVoxels = x*y*z
-print (nosOfVoxels)
+print ("TOTAL NUMBER OF POSSIBLE VOXELS:",nosOfVoxels)
 print ("Will continue in a second...")
 time.sleep(2) # So you can see the total number of voxels...
 
@@ -468,6 +655,7 @@ while optimise:
 		sliceMatrix = numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1)
 		originalMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
 		previousMatrix = deepcopy(numpy.rot90(numpy.fliplr(numpyArrayForLego[z]),1))
+		originalColourMatrix = deepcopy(sliceMatrix)
 		#==================================
 		#Hollowing function - WORK IN PROGRESS
 		'''#For Hollowing but needs adjustment to reduce the degree of hollowing before the final layer above the hollowing (otherwise bricks will simply fall in the hollow!
@@ -481,6 +669,9 @@ while optimise:
 		'''	
 		#Optimise the layer...
 		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
+		#Clean up the remaining 1x1 bricks
+		sliceMatrix,optimisedBrickData = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData)
+
 		print ("OPTIMISATION COMPLETE...")
 		print
 		print ("Original Voxel Matrix Slice")
@@ -495,11 +686,14 @@ while optimise:
 			input() #USEFUL FOR CHECKING EACH LAYER
 		#Now read the bricks in the optimisedBrickData array and actually write them out as an ldr file...
 		countBrick = 0
+		secondPassRotateCorrection = 0
 		for brick in optimisedBrickData:
 			countBrick = countBrick + 1
-			print (brick)
-			print ()
+			print()
+			print("Brick data from optimisedBrickData...")
+			print ("Brick",brick,"Layer",z)
 			print (brick[0],brick[1],brick[2],brick[3],brick[4],brick[5],brick[6])
+			#print ()
 			#Assign the variables for each element in optimisedBrickData  
 			partID = brick[0]
 			x = brick[1]
@@ -517,14 +711,25 @@ while optimise:
 			#MAKE ADJUSTMENTS DEPENDING ON BRICK SIZE 
 			correctionX = 0
 			correctionY = 0
-			
+			print (brickX, brickX%2)
+
 			if brickX%2 != 0:
-				print ("EVEN")
+				print ("ODD")
 				correctionX = 10
 				if z%2 != 0:
 					correctionX = 10
+				if z%2 != 0 and brickX ==1 and brickY == 3 and brickRotate == 0:
+					print ("Found Second Pass 1x3 - Rotating...")
+					secondPassRotateCorrection = 1
+					#correctionY = -20
+					#correctionX = 30
+				if z%2 != 0 and brickX ==1 and brickY == 2 and brickRotate == 0:
+					print ("Found Second Pass 1x2 - Rotating...")
+					secondPassRotateCorrection = 1
+					#correctionY = -20
+					#correctionX = 30	
 			if brickY%2 != 0 and brickX !=1 and brickY !=1:
-				print ("ODD")
+				print ("EVEN")
 				correctionY = 10
 				if z%2 != 0:
 					print ("EVEN 3x2")
@@ -575,6 +780,11 @@ while optimise:
 				correctionX = correctionX + 10
 				
 			if brickRotate == 0:
+				if secondPassRotateCorrection == 1: #Rotate second pass 1x3 bricks
+					print ("Fixing second pass rotation...")
+					#m1 = -1;m2 = 0;m3 = 0;m4 = 0;m5 = 1;m6 = 0;m7 = 0;m8 = 0;m9 = -1
+					m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
+					secondPassRotateCorrection = 0
 				width = width - correctionX
 				depth = depth + correctionY
 				ldrLine = activeLine(active,brickColour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Construct the ldr line
@@ -595,9 +805,11 @@ while optimise:
 			#Write the LDR name to file...	
 			legoWriter(fileName,dateTimeStamp,ldrLine) #Write the line to a ldr file
 			print ("countBrick:",countBrick)
+			#input("Part written to ldr...")
 			if z >= layerStop:
 				input() # USEFUL FOR CHECKING EACH BRICK ADDITION
 			legoWriter(fileName,dateTimeStamp,'0 STEP')
+		#input("Layer written to ldr...")
 		z = z + 1
 		#count = count + 1
 		optimisedBrickData = []
