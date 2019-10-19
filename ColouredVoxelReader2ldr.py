@@ -326,7 +326,7 @@ def getFile():
 			indexNumber = fileList.index(fileName)
 			print (indexNumber+1, "-", fileName)
 		confirmedNumber = checkInput(nosOfFiles)
-		print ("Confirmed Number:",confirmedNumber)
+		print ("Confirmed File:",confirmedNumber)
 		#input()
 		nameOfFile = fileList[int(confirmedNumber)-1]
 	else:
@@ -337,8 +337,22 @@ def getFile():
 	
 	return (nameOfFile)	
 
+def chooseBricksOrPlates():
+	print ("1 - Bricks")
+	print ("2 - Plates")
+	bricksOrPlates = input ("Chose 1 (Bricks) or (2) Plates? ")
+	try:
+		bricksOrPlates = int(bricksOrPlates)
+		while bricksOrPlates < 1 or bricksOrPlates > 2:
+			print ("Please chose a number between 1 and 2")
+			bricksOrPlates = input ("Chose 1 (Bricks) or (2) Plates? ")
+	except:
+		print ("Please chose a NUMBER between 1 and 2")
+		chooseBricksOrPlates()
+	
+	return(bricksOrPlates)	
 
-def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
+def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData,bricksOrPlates):
 	print ("Optimising Layer to remove 1x1 bricks...")
 	print ("baseMatrix\n",baseMatrix)
 	print ("Colour Marix\n",colourMatrix)
@@ -373,7 +387,11 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 					sortedDictionary = [(k, d[k]) for k in sorted(d, key=d.get, reverse=True)]
 					for key, value in sortedDictionary:
 						dictionaryCounter = dictionaryCounter + 1
-						if key == "3622.DAT" or key == "3004.DAT" or key == "3005.DAT": # Only match 1x3 or 1x2 or 1x1 (which can't be optimised) bricks - this should add strength
+						if bricksOrPlates == 1:
+							partString01 = "3622.DAT";partString02 = "3004.DAT";partString03 = "3005.DAT"
+						else:
+							partString01 = "3623.DAT";partString02 = "3023.DAT";partString03 = "3024.DAT"
+						if key == partString01 or key == partString02 or key == partString03: # Only match 1x3 or 1x2 or 1x1 (which can't be optimised) bricks - this should add strength
 							#check the shapes around the voxel 
 							brickX,brickY = value
 							brick = brickMatrix(brickX,brickY,remapVoxelColour)
@@ -411,7 +429,7 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 									print ("Brick:\n",brick)
 									#input("Vertical match on second pass")
 									match = 1
-									if key == "3005.DAT": #Don't rotate the 1x1 bricks - there is no point
+									if key == partString03: #Don't rotate the 1x1 bricks - there is no point
 										rotate = 0
 									else:
 										rotate = 1
@@ -492,12 +510,12 @@ def secondPass(baseMatrix,colourMatrix,sliceValue,optimisedBrickData):
 			print ()
 			print ("remapOptimisedBrickData\n",remapOptimisedBrickData)
 			#input()
-			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData) #Rebuild the optimisedBrickData list using the new data...
+			optimisedBrickData = rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData,bricksOrPlates) #Rebuild the optimisedBrickData list using the new data...
 			optimise = False
 		#Compare bricks in optimisedBrickData and remapOptimisedBrickData:
 	return (remapOptimisedBrickData,optimisedBrickData)	
 
-def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
+def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData,bricksOrPlates):
 	#newOptimisedBrickData = optimisedBrickData
 	deletionList = []
 	for i,brickData in enumerate(optimisedBrickData):
@@ -507,7 +525,11 @@ def rebuildOptimisedBrickData(optimisedBrickData,remapOptimisedBrickData):
 				#print ("MATCH",brickData)
 			else:
 				#print ("No match")
-				if "3005.DAT" in brickData:
+				if bricksOrPlates == 1:
+					deletionBrick = "3005.DAT"
+				else:
+					deletionBrick = "3024.DAT"
+				if deletionBrick in brickData:
 					#print ("Deleting",i,brickData,"from optimisedBrickData")
 					if i not in deletionList:
 						deletionList.append(i)
@@ -532,10 +554,16 @@ layerStop = 10000
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
-BricksOrPlates = input ("Bricks or Plates? ")
+#bricksOrPlates = input ("Bricks or Plates? ")
 #tmp line for testing...
-#BricksOrPlates = 1 #1 for Bricks, 2 for Plates (allows for subsequent Duplo options)
+#bricksOrPlates = 1 #1 for Bricks, 2 for Plates (allows for subsequent Duplo options)
+#bricksOrPlates = int(bricksOrPlates)
+bricksOrPlates = chooseBricksOrPlates()
 print ("You chose: ", initialFileName)
+if bricksOrPlates == 1:	
+	print ("You choose BRICKS")
+else:	
+	print ("You choose PLATES")
 try:
 	voxelMatrix = VoxParser(initialFileName).parse()
 except:
@@ -608,7 +636,7 @@ depthOfMatrix = z
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 		
 
-if BricksOrPlates == 1:
+if bricksOrPlates == 1:
 	#Set Up the Brick Dictionary
 	optimisationDictionary = {}
 	optimisationDictionary["3006.DAT"]=[2,10]	#3 903
@@ -648,12 +676,19 @@ height = 0
 depth = 0
 #Set up the basic rotation matrix for the ldr file
 m1 = 0;m2 = 0;m3 = 1;m4 = 0;m5 = 1;m6 = 0;m7 = -1;m8 = 0;m9 = 0
-#Set the part for each voxel - currently this only works for 1x1 bricks - now unused
-partID = "3005.dat" #Use 1x1 bricks
+
+#Set the part for each voxel - currently this only works for 1x1 bricks
+if bricksOrPlates == 1:
+	partID = "3005.dat" #Use 1x1 bricks
+else:
+	partID = "3024.dat" #Use 1x1 bricks
 
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
-fileName = initialFileName[:-4] +"_" + dateTimeStamp + ".ldr" #Give every ldr fileName a timestamp
-fileName = initialFileName[:-4] + ".ldr" #Give every ldr file the SAME  fileName
+#fileName = initialFileName[:-4] +"_" + dateTimeStamp + ".ldr" #Give every ldr fileName a timestamp
+if bricksOrPlates == 1: 
+	fileName = initialFileName[:-4] + "_B.ldr" #Give every ldr file the SAME  fileName
+else:
+	fileName = initialFileName[:-4] + "_P.ldr" #Give every ldr file the SAME  fileName
 
 ldrLine = activeLine(active,colour,width,height,depth,m1,m2,m3,m4,m5,m6,m7,m8,m9,partID) #Create a raw ldr line width,height and depth will be updated as the loop below scans the .vox array
 
@@ -689,7 +724,7 @@ while optimise:
 		#Optimise the layer...
 		sliceMatrix,previousMatrix, optimisedBrickData = optimiseSlice(sliceMatrix,previousMatrix,z)
 		#Clean up the remaining 1x1 bricks
-		sliceMatrix,optimisedBrickData = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData)
+		sliceMatrix,optimisedBrickData = secondPass(sliceMatrix,originalColourMatrix,z,optimisedBrickData,bricksOrPlates)
 
 		print ("OPTIMISATION COMPLETE...")
 		print
@@ -725,7 +760,7 @@ while optimise:
 			#Convert to Lego Values
 			width = x*20+10 #Convert x and y into lego dimensions
 			depth = y*20+10+((brickY/2)*20) #Convert x and y into lego dimensions
-			if BricksOrPlates == 1:
+			if bricksOrPlates == 1:
 				height = z*-24 #Convert z into lego dimensions
 			else:
 				height = z*-8
