@@ -532,6 +532,9 @@ layerStop = 10000
 #Read the .vox voxel file...
 print ("Looking for .vox files...")
 initialFileName = getFile()
+BricksOrPlates = input ("Bricks or Plates? ")
+#tmp line for testing...
+#BricksOrPlates = 1 #1 for Bricks, 2 for Plates (allows for subsequent Duplo options)
 print ("You chose: ", initialFileName)
 try:
 	voxelMatrix = VoxParser(initialFileName).parse()
@@ -604,21 +607,37 @@ depthOfMatrix = z
 
 dateTimeStamp = timeStamp() #Get timeStamp for fileName
 		
-#Set Up the Brick Dictionary
-optimisationDictionary = {}
-optimisationDictionary["3006.DAT"]=[2,10]	#3 903
-optimisationDictionary["3007.DAT"]=[2,8]	#4 904
-optimisationDictionary["2456.DAT"]=[2,6]	#5 905
-optimisationDictionary["3001.DAT"]=[2,4]	#6 906
-optimisationDictionary["3002.DAT"]=[2,3]	#7 907
-optimisationDictionary["3003.DAT"]=[2,2]	#8 908
-optimisationDictionary["3008.DAT"]=[1,8]	#9 909
-optimisationDictionary["3009.DAT"]=[1,6]	#10 910
-optimisationDictionary["3010.DAT"]=[1,4]	#11 911
-optimisationDictionary["3622.DAT"]=[1,3]	#12 912
-optimisationDictionary["3004.DAT"]=[1,2]	#13 913
-optimisationDictionary["3005.DAT"]=[1,1]	#14 914
-	
+
+if BricksOrPlates == 1:
+	#Set Up the Brick Dictionary
+	optimisationDictionary = {}
+	optimisationDictionary["3006.DAT"]=[2,10]	#3 903
+	optimisationDictionary["3007.DAT"]=[2,8]	#4 904
+	optimisationDictionary["2456.DAT"]=[2,6]	#5 905
+	optimisationDictionary["3001.DAT"]=[2,4]	#6 906
+	optimisationDictionary["3002.DAT"]=[2,3]	#7 907
+	optimisationDictionary["3003.DAT"]=[2,2]	#8 908
+	optimisationDictionary["3008.DAT"]=[1,8]	#9 909
+	optimisationDictionary["3009.DAT"]=[1,6]	#10 910
+	optimisationDictionary["3010.DAT"]=[1,4]	#11 911
+	optimisationDictionary["3622.DAT"]=[1,3]	#12 912
+	optimisationDictionary["3004.DAT"]=[1,2]	#13 913
+	optimisationDictionary["3005.DAT"]=[1,1]	#14 914
+else:
+	#Set Up the Plate Dictionary
+	optimisationDictionary = {}
+	optimisationDictionary["3832.DAT"]=[2,10]	#3 903
+	optimisationDictionary["3034.DAT"]=[2,8]	#4 904
+	optimisationDictionary["3795.DAT"]=[2,6]	#5 905
+	optimisationDictionary["3020.DAT"]=[2,4]	#6 906
+	optimisationDictionary["3021.DAT"]=[2,3]	#7 907
+	optimisationDictionary["3022.DAT"]=[2,2]	#8 908
+	optimisationDictionary["3460.DAT"]=[1,8]	#9 909
+	optimisationDictionary["3666.DAT"]=[1,6]	#10 910
+	optimisationDictionary["3710.DAT"]=[1,4]	#11 911
+	optimisationDictionary["3623.DAT"]=[1,3]	#12 912
+	optimisationDictionary["3023.DAT"]=[1,2]	#13 913
+	optimisationDictionary["3024.DAT"]=[1,1]	#14 914	
 #LDR Line example
 #1 69 -20 -24 -20 0 0 1 0 1 0 -1 0 0 3005.dat
 #Setup the basic LDR line...
@@ -706,7 +725,10 @@ while optimise:
 			#Convert to Lego Values
 			width = x*20+10 #Convert x and y into lego dimensions
 			depth = y*20+10+((brickY/2)*20) #Convert x and y into lego dimensions
-			height = z*-24 #Convert z into lego dimensions
+			if BricksOrPlates == 1:
+				height = z*-24 #Convert z into lego dimensions
+			else:
+				height = z*-8
 
 			#MAKE ADJUSTMENTS DEPENDING ON BRICK SIZE 
 			correctionX = 0
