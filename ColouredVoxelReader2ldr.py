@@ -1,5 +1,6 @@
 #ColouredVoxel2LDR Converter
 #Neil Marsden Feb 2017
+import sys
 
 try: # Check for numpy
 	import numpy 
@@ -22,7 +23,7 @@ except:
 	sys.exit(0)
 
 import random
-import os,datetime, time, sys,math
+import os,datetime, time,math
 from copy import deepcopy
 import glob
 
